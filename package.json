@@ -1,0 +1,36 @@
+{
+  "name": "@sloth-os/mm-gateway-ts",
+  "version": "0.1.0",
+  "description": "OpenAPI client for mm-gateway-ts",
+  "author": "OpenAPI-Generator Contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sloth-os/mm-gateway-ts.git"
+  },
+  "keywords": [
+    "axios",
+    "typescript",
+    "openapi-client",
+    "openapi-generator",
+    "mm-gateway-ts"
+  ],
+  "license": "Unlicense",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "module": "./dist/esm/index.js",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.esm.json",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "axios": "^1.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "12.11.5 - 12.20.42",
+    "typescript": "^4.0 || ^5.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}
