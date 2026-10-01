@@ -6,7 +6,11 @@ api.ts
 base.ts
 common.ts
 configuration.ts
+docs/BudgetDirective.md
+docs/BudgetState.md
 docs/Dimensions.md
+docs/EstimateCandidate.md
+docs/EstimateResponse.md
 docs/HealthResponse.md
 docs/ImageInput.md
 docs/ImageOutput.md
@@ -23,6 +27,7 @@ docs/ModelEntry.md
 docs/ModelLimitsEntry.md
 docs/ModelLimitsListResponse.md
 docs/ModelListResponse.md
+docs/ModelSpend.md
 docs/MusicApi.md
 docs/MusicAudioInput.md
 docs/MusicImageInput.md
@@ -34,9 +39,13 @@ docs/ProblemDetail.md
 docs/ProxyApi.md
 docs/ResourceLinks.md
 docs/RoutingDirective.md
+docs/RoutingInfo.md
 docs/TaskError.md
 docs/TextInput.md
 docs/Usage.md
+docs/UsageApi.md
+docs/UsagePeriod.md
+docs/UsageResponse.md
 docs/VideoAudioInput.md
 docs/VideoImageInput.md
 docs/VideoInput.md

@@ -24,12 +24,92 @@ import type { RequestArgs } from './base';
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
 
 /**
+ * A client-chosen spend bucket within the key, optionally self-capped.
+ */
+export interface BudgetDirective {
+    /**
+     * Self-imposed cap for the scope in USD (the operator\'s scope cap still applies).
+     */
+    'limit_usd'?: number | null;
+    /**
+     * Spend bucket name (a project, a customer, a batch).
+     */
+    'scope': string;
+}
+/**
+ * The state of one budget (a key\'s period or a client scope).
+ */
+export interface BudgetState {
+    [key: string]: any;
+
+    'limit_usd'?: number | null;
+    'remaining_usd'?: number | null;
+    'reserved_usd'?: number;
+    'scope'?: string | null;
+    'spent_usd'?: number;
+    'tasks'?: number | null;
+}
+/**
  * Exact output dimensions in pixels.
  */
 export interface Dimensions {
     'height': number;
     'width': number;
 }
+export interface EstimateCandidate {
+    [key: string]: any;
+
+    'admissible'?: boolean;
+    'estimated_cost'?: number | null;
+    'lifecycle'?: EstimateCandidateLifecycleEnum;
+    'model': string;
+    /**
+     * Why the candidate is not admissible: limits, retired, max_cost, unpriced or budget.
+     */
+    'reason'?: string | null;
+}
+
+export const EstimateCandidateLifecycleEnum = {
+    Active: 'active',
+    Deprecated: 'deprecated',
+    Retired: 'retired',
+} as const;
+
+export type EstimateCandidateLifecycleEnum = typeof EstimateCandidateLifecycleEnum[keyof typeof EstimateCandidateLifecycleEnum];
+
+/**
+ * The routing and cost a create would get, without creating a task.
+ */
+export interface EstimateResponse {
+    [key: string]: any;
+
+    'budget'?: BudgetState | null;
+    'candidates'?: Array<EstimateCandidate>;
+    'currency'?: EstimateResponseCurrencyEnum;
+    'estimated_cost'?: number | null;
+    'modality': EstimateResponseModalityEnum;
+    'model'?: string | null;
+    'object'?: EstimateResponseObjectEnum;
+}
+
+export const EstimateResponseCurrencyEnum = {
+    Usd: 'USD',
+} as const;
+
+export type EstimateResponseCurrencyEnum = typeof EstimateResponseCurrencyEnum[keyof typeof EstimateResponseCurrencyEnum];
+export const EstimateResponseModalityEnum = {
+    Image: 'image',
+    Video: 'video',
+    Music: 'music',
+} as const;
+
+export type EstimateResponseModalityEnum = typeof EstimateResponseModalityEnum[keyof typeof EstimateResponseModalityEnum];
+export const EstimateResponseObjectEnum = {
+    Estimate: 'estimate',
+} as const;
+
+export type EstimateResponseObjectEnum = typeof EstimateResponseObjectEnum[keyof typeof EstimateResponseObjectEnum];
+
 export interface HealthResponse {
     [key: string]: any;
 
@@ -118,6 +198,7 @@ export interface ImageTaskResponse {
     'model': string;
     'object'?: ImageTaskResponseObjectEnum;
     'outputs'?: Array<ImageOutput>;
+    'routing'?: RoutingInfo | null;
     'status': ImageTaskResponseStatusEnum;
     'usage'?: Usage | null;
 }
@@ -239,6 +320,23 @@ export const ModelListResponseObjectEnum = {
 
 export type ModelListResponseObjectEnum = typeof ModelListResponseObjectEnum[keyof typeof ModelListResponseObjectEnum];
 
+export interface ModelSpend {
+    [key: string]: any;
+
+    'modality': ModelSpendModalityEnum;
+    'model': string;
+    'spent_usd'?: number;
+    'tasks'?: number;
+}
+
+export const ModelSpendModalityEnum = {
+    Image: 'image',
+    Video: 'video',
+    Music: 'music',
+} as const;
+
+export type ModelSpendModalityEnum = typeof ModelSpendModalityEnum[keyof typeof ModelSpendModalityEnum];
+
 export interface MusicAudioInput {
     'role'?: MusicAudioInputRoleEnum;
     'type': MusicAudioInputTypeEnum;
@@ -345,6 +443,7 @@ export interface MusicTaskResponse {
     'model': string;
     'object'?: MusicTaskResponseObjectEnum;
     'outputs'?: Array<MusicOutput>;
+    'routing'?: RoutingInfo | null;
     'status': MusicTaskResponseStatusEnum;
     'usage'?: Usage | null;
 }
@@ -413,13 +512,56 @@ export interface ResourceLinks {
     'self': string;
 }
 /**
- * Select a server-defined, provider-neutral routing policy.
+ * Steer auto mode: policy, ordering, cost ceiling, fallbacks and budget scope.  See docs/design/auto-mode.md. Every member is optional.
  */
 export interface RoutingDirective {
+    'budget'?: BudgetDirective | null;
+    /**
+     * Pinned models only: `none` (default) tries one backend, `same_model` every backend/account serving the model, `any` also the replacement and the auto candidates when the model is retired or unavailable.
+     */
+    'fallback'?: RoutingDirectiveFallbackEnum | null;
+    /**
+     * Hard per-task ceiling on the estimated cost in USD; unpriced models are excluded.
+     */
+    'max_cost_usd'?: number | null;
+    /**
+     * How admissible candidates are ordered (default: the gateway\'s default, `balanced`).
+     */
+    'optimize'?: RoutingDirectiveOptimizeEnum | null;
     /**
      * Gateway-defined routing profile, such as `quality`, `fast`, or `eu`. It never names a provider or backend.
      */
-    'profile': string;
+    'profile'?: string | null;
+}
+
+export const RoutingDirectiveFallbackEnum = {
+    None: 'none',
+    SameModel: 'same_model',
+    Any: 'any',
+} as const;
+
+export type RoutingDirectiveFallbackEnum = typeof RoutingDirectiveFallbackEnum[keyof typeof RoutingDirectiveFallbackEnum];
+export const RoutingDirectiveOptimizeEnum = {
+    Balanced: 'balanced',
+    Cost: 'cost',
+    Latency: 'latency',
+} as const;
+
+export type RoutingDirectiveOptimizeEnum = typeof RoutingDirectiveOptimizeEnum[keyof typeof RoutingDirectiveOptimizeEnum];
+
+/**
+ * How auto mode served a task (docs/design/auto-mode.md#fallbacks).
+ */
+export interface RoutingInfo {
+    [key: string]: any;
+
+    'attempts'?: number;
+    'budget'?: BudgetState | null;
+    'estimated_cost'?: number | null;
+    'fallback'?: boolean;
+    'fallback_reason'?: string | null;
+    'optimize'?: string;
+    'requested_model': string;
 }
 export interface TaskError {
     [key: string]: any;
@@ -445,12 +587,68 @@ export interface Usage {
     [key: string]: any;
 
     'cost'?: number | null;
+    'cost_source'?: UsageCostSourceEnum | null;
+    'currency'?: UsageCurrencyEnum | null;
     'duration_seconds'?: number | null;
     'input_tokens'?: number | null;
     'output_count'?: number | null;
     'output_tokens'?: number | null;
     'total_tokens'?: number | null;
 }
+
+export const UsageCostSourceEnum = {
+    Provider: 'provider',
+    Estimate: 'estimate',
+} as const;
+
+export type UsageCostSourceEnum = typeof UsageCostSourceEnum[keyof typeof UsageCostSourceEnum];
+export const UsageCurrencyEnum = {
+    Usd: 'USD',
+} as const;
+
+export type UsageCurrencyEnum = typeof UsageCurrencyEnum[keyof typeof UsageCurrencyEnum];
+
+export interface UsagePeriod {
+    [key: string]: any;
+
+    'end'?: string | null;
+    'kind': UsagePeriodKindEnum;
+    'start'?: string | null;
+}
+
+export const UsagePeriodKindEnum = {
+    Day: 'day',
+    Month: 'month',
+    Total: 'total',
+} as const;
+
+export type UsagePeriodKindEnum = typeof UsagePeriodKindEnum[keyof typeof UsagePeriodKindEnum];
+
+/**
+ * Spend, reservations and budgets of the authenticated key.
+ */
+export interface UsageResponse {
+    [key: string]: any;
+
+    'currency'?: UsageResponseCurrencyEnum;
+    'key': BudgetState;
+    'models'?: Array<ModelSpend>;
+    'object'?: UsageResponseObjectEnum;
+    'period': UsagePeriod;
+    'scopes'?: Array<BudgetState>;
+}
+
+export const UsageResponseCurrencyEnum = {
+    Usd: 'USD',
+} as const;
+
+export type UsageResponseCurrencyEnum = typeof UsageResponseCurrencyEnum[keyof typeof UsageResponseCurrencyEnum];
+export const UsageResponseObjectEnum = {
+    Usage: 'usage',
+} as const;
+
+export type UsageResponseObjectEnum = typeof UsageResponseObjectEnum[keyof typeof UsageResponseObjectEnum];
+
 export interface VideoAudioInput {
     'role'?: VideoAudioInputRoleEnum;
     'type': VideoAudioInputTypeEnum;
@@ -578,6 +776,7 @@ export interface VideoTaskResponse {
     'model': string;
     'object'?: VideoTaskResponseObjectEnum;
     'outputs'?: Array<VideoOutput>;
+    'routing'?: RoutingInfo | null;
     'status': VideoTaskResponseStatusEnum;
     'usage'?: Usage | null;
 }
@@ -637,6 +836,45 @@ export const ImagesApiAxiosParamCreator = function (configuration?: Configuratio
             if (idempotencyKey != null) {
                 localVarHeaderParameter['Idempotency-Key'] = String(idempotencyKey);
             }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(imageRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Estimate an image request
+         * @param {ImageRequest} imageRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        estimateImage: async (imageRequest: ImageRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'imageRequest' is not null or undefined
+            assertParamExists('estimateImage', 'imageRequest', imageRequest)
+            const localVarPath = `/v1/images/estimate`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -714,6 +952,19 @@ export const ImagesApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Estimate an image request
+         * @param {ImageRequest} imageRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async estimateImage(imageRequest: ImageRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EstimateResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.estimateImage(imageRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ImagesApi.estimateImage']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Retrieve an image task
          * @param {string} imageId Opaque image task id.
          * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
@@ -748,6 +999,16 @@ export const ImagesApiFactory = function (configuration?: Configuration, basePat
         },
         /**
          * 
+         * @summary Estimate an image request
+         * @param {ImageRequest} imageRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        estimateImage(imageRequest: ImageRequest, options?: RawAxiosRequestConfig): AxiosPromise<EstimateResponse> {
+            return localVarFp.estimateImage(imageRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Retrieve an image task
          * @param {string} imageId Opaque image task id.
          * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
@@ -774,6 +1035,17 @@ export class ImagesApi extends BaseAPI {
      */
     public createImage(imageRequest: ImageRequest, idempotencyKey?: string | null, options?: RawAxiosRequestConfig) {
         return ImagesApiFp(this.configuration).createImage(imageRequest, idempotencyKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Estimate an image request
+     * @param {ImageRequest} imageRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public estimateImage(imageRequest: ImageRequest, options?: RawAxiosRequestConfig) {
+        return ImagesApiFp(this.configuration).estimateImage(imageRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1196,6 +1468,45 @@ export const MusicApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @summary Estimate a music request
+         * @param {MusicRequest} musicRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        estimateMusic: async (musicRequest: MusicRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'musicRequest' is not null or undefined
+            assertParamExists('estimateMusic', 'musicRequest', musicRequest)
+            const localVarPath = `/v1/music/estimate`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(musicRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Retrieve a music task
          * @param {string} musicId Opaque music task id.
          * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
@@ -1261,6 +1572,19 @@ export const MusicApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Estimate a music request
+         * @param {MusicRequest} musicRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async estimateMusic(musicRequest: MusicRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EstimateResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.estimateMusic(musicRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MusicApi.estimateMusic']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Retrieve a music task
          * @param {string} musicId Opaque music task id.
          * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
@@ -1295,6 +1619,16 @@ export const MusicApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
+         * @summary Estimate a music request
+         * @param {MusicRequest} musicRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        estimateMusic(musicRequest: MusicRequest, options?: RawAxiosRequestConfig): AxiosPromise<EstimateResponse> {
+            return localVarFp.estimateMusic(musicRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Retrieve a music task
          * @param {string} musicId Opaque music task id.
          * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
@@ -1321,6 +1655,17 @@ export class MusicApi extends BaseAPI {
      */
     public createMusic(musicRequest: MusicRequest, idempotencyKey?: string | null, options?: RawAxiosRequestConfig) {
         return MusicApiFp(this.configuration).createMusic(musicRequest, idempotencyKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Estimate a music request
+     * @param {MusicRequest} musicRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public estimateMusic(musicRequest: MusicRequest, options?: RawAxiosRequestConfig) {
+        return MusicApiFp(this.configuration).estimateMusic(musicRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1925,6 +2270,112 @@ export class ProxyApi extends BaseAPI {
 
 
 /**
+ * UsageApi - axios parameter creator
+ */
+export const UsageApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Spend and budgets of the authenticated key
+         * @param {string | null} [scope] Report only this budget scope.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUsage: async (scope?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/usage`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (scope !== undefined) {
+                localVarQueryParameter['scope'] = scope;
+            }
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * UsageApi - functional programming interface
+ */
+export const UsageApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = UsageApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Spend and budgets of the authenticated key
+         * @param {string | null} [scope] Report only this budget scope.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUsage(scope?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UsageResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUsage(scope, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsageApi.getUsage']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * UsageApi - factory interface
+ */
+export const UsageApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = UsageApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Spend and budgets of the authenticated key
+         * @param {string | null} [scope] Report only this budget scope.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUsage(scope?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<UsageResponse> {
+            return localVarFp.getUsage(scope, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * UsageApi - object-oriented interface
+ */
+export class UsageApi extends BaseAPI {
+    /**
+     * 
+     * @summary Spend and budgets of the authenticated key
+     * @param {string | null} [scope] Report only this budget scope.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getUsage(scope?: string | null, options?: RawAxiosRequestConfig) {
+        return UsageApiFp(this.configuration).getUsage(scope, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * VideosApi - axios parameter creator
  */
 export const VideosApiAxiosParamCreator = function (configuration?: Configuration) {
@@ -1962,6 +2413,45 @@ export const VideosApiAxiosParamCreator = function (configuration?: Configuratio
             if (idempotencyKey != null) {
                 localVarHeaderParameter['Idempotency-Key'] = String(idempotencyKey);
             }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(videoRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Estimate a video request
+         * @param {VideoRequest} videoRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        estimateVideo: async (videoRequest: VideoRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'videoRequest' is not null or undefined
+            assertParamExists('estimateVideo', 'videoRequest', videoRequest)
+            const localVarPath = `/v1/videos/estimate`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2039,6 +2529,19 @@ export const VideosApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Estimate a video request
+         * @param {VideoRequest} videoRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async estimateVideo(videoRequest: VideoRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EstimateResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.estimateVideo(videoRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VideosApi.estimateVideo']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Retrieve a video task
          * @param {string} videoId Opaque video task id.
          * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
@@ -2073,6 +2576,16 @@ export const VideosApiFactory = function (configuration?: Configuration, basePat
         },
         /**
          * 
+         * @summary Estimate a video request
+         * @param {VideoRequest} videoRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        estimateVideo(videoRequest: VideoRequest, options?: RawAxiosRequestConfig): AxiosPromise<EstimateResponse> {
+            return localVarFp.estimateVideo(videoRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Retrieve a video task
          * @param {string} videoId Opaque video task id.
          * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
@@ -2099,6 +2612,17 @@ export class VideosApi extends BaseAPI {
      */
     public createVideo(videoRequest: VideoRequest, idempotencyKey?: string | null, options?: RawAxiosRequestConfig) {
         return VideosApiFp(this.configuration).createVideo(videoRequest, idempotencyKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Estimate a video request
+     * @param {VideoRequest} videoRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public estimateVideo(videoRequest: VideoRequest, options?: RawAxiosRequestConfig) {
+        return VideosApiFp(this.configuration).estimateVideo(videoRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

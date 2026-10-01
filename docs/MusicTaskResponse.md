@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **model** | **string** |  | [default to undefined]
 **object** | **string** |  | [optional] [default to ObjectEnum_Music]
 **outputs** | [**Array&lt;MusicOutput&gt;**](MusicOutput.md) |  | [optional] [default to undefined]
+**routing** | [**RoutingInfo**](RoutingInfo.md) |  | [optional] [default to undefined]
 **status** | **string** |  | [default to undefined]
 **usage** | [**Usage**](Usage.md) |  | [optional] [default to undefined]
 
@@ -34,6 +35,7 @@ const instance: MusicTaskResponse = {
     model,
     object,
     outputs,
+    routing,
     status,
     usage,
 };

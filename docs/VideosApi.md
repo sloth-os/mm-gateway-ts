@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost*
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
 |[**createVideo**](#createvideo) | **POST** /v1/videos | Create a video task|
+|[**estimateVideo**](#estimatevideo) | **POST** /v1/videos/estimate | Estimate a video request|
 |[**getVideo**](#getvideo) | **GET** /v1/videos/{video_id} | Retrieve a video task|
 
 # **createVideo**
@@ -63,6 +64,65 @@ const { status, data } = await apiInstance.createVideo(
 |**403** | Key not allowed to perform the request (forbidden). |  -  |
 |**404** | Model or task not found. |  -  |
 |**409** | Idempotency key conflicts with an earlier request. |  -  |
+|**422** | Validation Error |  -  |
+|**502** | Generation service returned an error. |  -  |
+|**503** | No usable generation service is configured. |  -  |
+|**504** | Generation service timed out. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **estimateVideo**
+> EstimateResponse estimateVideo(videoRequest)
+
+
+### Example
+
+```typescript
+import {
+    VideosApi,
+    Configuration,
+    VideoRequest
+} from 'mm-gateway-ts';
+
+const configuration = new Configuration();
+const apiInstance = new VideosApi(configuration);
+
+let videoRequest: VideoRequest; //
+
+const { status, data } = await apiInstance.estimateVideo(
+    videoRequest
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **videoRequest** | **VideoRequest**|  | |
+
+
+### Return type
+
+**EstimateResponse**
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json, application/problem+json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | How auto mode would route the request, and its estimated cost. |  -  |
+|**400** | Invalid request (invalid_request_error / unsupported_feature). |  -  |
+|**401** | Missing or unknown API key (unauthorized). |  -  |
+|**403** | Key not allowed to perform the request (forbidden). |  -  |
+|**404** | Model or task not found. |  -  |
 |**422** | Validation Error |  -  |
 |**502** | Generation service returned an error. |  -  |
 |**503** | No usable generation service is configured. |  -  |

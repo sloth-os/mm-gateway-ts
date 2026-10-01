@@ -7,6 +7,8 @@ Provider-neutral usage fields shared by all three modalities.
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **cost** | **number** |  | [optional] [default to undefined]
+**cost_source** | **string** |  | [optional] [default to undefined]
+**currency** | **string** |  | [optional] [default to undefined]
 **duration_seconds** | **number** |  | [optional] [default to undefined]
 **input_tokens** | **number** |  | [optional] [default to undefined]
 **output_count** | **number** |  | [optional] [default to undefined]
@@ -20,6 +22,8 @@ import { Usage } from 'mm-gateway-ts';
 
 const instance: Usage = {
     cost,
+    cost_source,
+    currency,
     duration_seconds,
     input_tokens,
     output_count,
