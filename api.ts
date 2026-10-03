@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * mm-gateway
- * Unified image, video, and music gateway with separate REST APIs.
+ * Provider-neutral image, video, music, speech and voice cloning gateway.
  *
  * The version of the OpenAPI document: 0.1.0
  * 
@@ -22,6 +22,96 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 import type { RequestArgs } from './base';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
+
+export interface AudioOutput {
+    [key: string]: any;
+
+    'channels'?: number | null;
+    'duration_seconds'?: number | null;
+    'mime_type'?: string | null;
+    'sample_rate_hz'?: number | null;
+    /**
+     * Absolute media URI. Inline media uses a base64 data URI.
+     */
+    'uri': string;
+}
+export interface AudioParameters {
+    'bitrate_kbps'?: number | null;
+    'delivery'?: AudioParametersDeliveryEnum | null;
+    'file_format'?: AudioParametersFileFormatEnum | null;
+    'instructions'?: string | null;
+    'language'?: string | null;
+    'sample_rate_hz'?: number | null;
+    'seed'?: number | null;
+    'speed'?: number | null;
+    /**
+     * A gateway voice id from GET /v1/voices.
+     */
+    'voice'?: string;
+}
+
+export const AudioParametersDeliveryEnum = {
+    Remote: 'remote',
+    Inline: 'inline',
+} as const;
+
+export type AudioParametersDeliveryEnum = typeof AudioParametersDeliveryEnum[keyof typeof AudioParametersDeliveryEnum];
+export const AudioParametersFileFormatEnum = {
+    Mp3: 'mp3',
+    Wav: 'wav',
+    Pcm: 'pcm',
+    Flac: 'flac',
+    Opus: 'opus',
+    Aac: 'aac',
+} as const;
+
+export type AudioParametersFileFormatEnum = typeof AudioParametersFileFormatEnum[keyof typeof AudioParametersFileFormatEnum];
+
+export interface AudioRequest {
+    'input': Array<TextInput>;
+    /**
+     * Client-owned metadata returned unchanged with the task.
+     */
+    'metadata'?: { [key: string]: any; };
+    /**
+     * Model id returned by GET /v1/models, or omit / set to `auto` to let the gateway auto-route to a backend whose limits fit the request\'s input (modalities, dimensions, duration, ...).
+     */
+    'model'?: string | null;
+    'parameters'?: AudioParameters;
+    'routing'?: RoutingDirective | null;
+}
+export interface AudioTaskResponse {
+    [key: string]: any;
+
+    'completed_at'?: string | null;
+    'created_at': string;
+    'error'?: TaskError | null;
+    'id': string;
+    'links': ResourceLinks;
+    'metadata'?: { [key: string]: any; };
+    'model': string;
+    'object'?: AudioTaskResponseObjectEnum;
+    'outputs'?: Array<AudioOutput>;
+    'routing'?: RoutingInfo | null;
+    'status': AudioTaskResponseStatusEnum;
+    'usage'?: Usage | null;
+}
+
+export const AudioTaskResponseObjectEnum = {
+    Audio: 'audio',
+} as const;
+
+export type AudioTaskResponseObjectEnum = typeof AudioTaskResponseObjectEnum[keyof typeof AudioTaskResponseObjectEnum];
+export const AudioTaskResponseStatusEnum = {
+    Pending: 'pending',
+    Running: 'running',
+    Succeeded: 'succeeded',
+    Failed: 'failed',
+    Cancelled: 'cancelled',
+    Expired: 'expired',
+} as const;
+
+export type AudioTaskResponseStatusEnum = typeof AudioTaskResponseStatusEnum[keyof typeof AudioTaskResponseStatusEnum];
 
 /**
  * A client-chosen spend bucket within the key, optionally self-capped.
@@ -101,6 +191,7 @@ export const EstimateResponseModalityEnum = {
     Image: 'image',
     Video: 'video',
     Music: 'music',
+    Audio: 'audio',
 } as const;
 
 export type EstimateResponseModalityEnum = typeof EstimateResponseModalityEnum[keyof typeof EstimateResponseModalityEnum];
@@ -257,6 +348,7 @@ export const ModelEntryModalityEnum = {
     Image: 'image',
     Video: 'video',
     Music: 'music',
+    Audio: 'audio',
 } as const;
 
 export type ModelEntryModalityEnum = typeof ModelEntryModalityEnum[keyof typeof ModelEntryModalityEnum];
@@ -285,6 +377,7 @@ export const ModelLimitsEntryModalityEnum = {
     Image: 'image',
     Video: 'video',
     Music: 'music',
+    Audio: 'audio',
 } as const;
 
 export type ModelLimitsEntryModalityEnum = typeof ModelLimitsEntryModalityEnum[keyof typeof ModelLimitsEntryModalityEnum];
@@ -333,6 +426,7 @@ export const ModelSpendModalityEnum = {
     Image: 'image',
     Video: 'video',
     Music: 'music',
+    Audio: 'audio',
 } as const;
 
 export type ModelSpendModalityEnum = typeof ModelSpendModalityEnum[keyof typeof ModelSpendModalityEnum];
@@ -590,6 +684,7 @@ export interface Usage {
     'cost_source'?: UsageCostSourceEnum | null;
     'currency'?: UsageCurrencyEnum | null;
     'duration_seconds'?: number | null;
+    'input_characters'?: number | null;
     'input_tokens'?: number | null;
     'output_count'?: number | null;
     'output_tokens'?: number | null;
@@ -796,6 +891,680 @@ export const VideoTaskResponseStatusEnum = {
 } as const;
 
 export type VideoTaskResponseStatusEnum = typeof VideoTaskResponseStatusEnum[keyof typeof VideoTaskResponseStatusEnum];
+
+export interface VoiceCloneRequest {
+    'consent': VoiceConsent;
+    'input': Array<VoiceSampleInput>;
+    /**
+     * Client-owned metadata returned unchanged with the task.
+     */
+    'metadata'?: { [key: string]: any; };
+    /**
+     * Model id returned by GET /v1/models, or omit / set to `auto` to let the gateway auto-route to a backend whose limits fit the request\'s input (modalities, dimensions, duration, ...).
+     */
+    'model'?: string | null;
+    'parameters': VoiceParameters;
+    'routing'?: RoutingDirective | null;
+}
+export interface VoiceConsent {
+    /**
+     * The speaker authorized creation and use of this voice.
+     */
+    'granted': VoiceConsentGrantedEnum;
+    'language'?: string | null;
+    /**
+     * Absolute media URI. Inline media uses a base64 data URI.
+     */
+    'recording_uri'?: string | null;
+}
+
+export const VoiceConsentGrantedEnum = {
+    True: true,
+} as const;
+
+export type VoiceConsentGrantedEnum = typeof VoiceConsentGrantedEnum[keyof typeof VoiceConsentGrantedEnum];
+
+export interface VoiceListResponse {
+    [key: string]: any;
+
+    'data': Array<VoiceResponse>;
+    'object'?: VoiceListResponseObjectEnum;
+}
+
+export const VoiceListResponseObjectEnum = {
+    List: 'list',
+} as const;
+
+export type VoiceListResponseObjectEnum = typeof VoiceListResponseObjectEnum[keyof typeof VoiceListResponseObjectEnum];
+
+export interface VoiceParameters {
+    'description'?: string | null;
+    'name': string;
+    'remove_background_noise'?: boolean | null;
+}
+export interface VoiceResponse {
+    [key: string]: any;
+
+    'completed_at'?: string | null;
+    'created_at'?: string | null;
+    'error'?: TaskError | null;
+    'id': string;
+    'kind'?: VoiceResponseKindEnum;
+    'links': ResourceLinks;
+    'metadata'?: { [key: string]: any; };
+    'model'?: string | null;
+    'name': string;
+    'object'?: VoiceResponseObjectEnum;
+    'routing'?: RoutingInfo | null;
+    'status': VoiceResponseStatusEnum;
+    'usage'?: Usage | null;
+    'verification_required'?: boolean;
+}
+
+export const VoiceResponseKindEnum = {
+    Preset: 'preset',
+    Cloned: 'cloned',
+} as const;
+
+export type VoiceResponseKindEnum = typeof VoiceResponseKindEnum[keyof typeof VoiceResponseKindEnum];
+export const VoiceResponseObjectEnum = {
+    Voice: 'voice',
+} as const;
+
+export type VoiceResponseObjectEnum = typeof VoiceResponseObjectEnum[keyof typeof VoiceResponseObjectEnum];
+export const VoiceResponseStatusEnum = {
+    Pending: 'pending',
+    Running: 'running',
+    Succeeded: 'succeeded',
+    Failed: 'failed',
+    Cancelled: 'cancelled',
+    Expired: 'expired',
+} as const;
+
+export type VoiceResponseStatusEnum = typeof VoiceResponseStatusEnum[keyof typeof VoiceResponseStatusEnum];
+
+export interface VoiceSampleInput {
+    'type': VoiceSampleInputTypeEnum;
+    /**
+     * Absolute media URI. Inline media uses a base64 data URI.
+     */
+    'uri': string;
+}
+
+export const VoiceSampleInputTypeEnum = {
+    Audio: 'audio',
+} as const;
+
+export type VoiceSampleInputTypeEnum = typeof VoiceSampleInputTypeEnum[keyof typeof VoiceSampleInputTypeEnum];
+
+
+/**
+ * AudioApi - axios parameter creator
+ */
+export const AudioApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Create a speech task
+         * @param {AudioRequest} audioRequest 
+         * @param {string | null} [idempotencyKey] Client-generated key used to safely retry this create request. Reuse with a different body returns 409.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createAudio: async (audioRequest: AudioRequest, idempotencyKey?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'audioRequest' is not null or undefined
+            assertParamExists('createAudio', 'audioRequest', audioRequest)
+            const localVarPath = `/v1/audio`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (idempotencyKey != null) {
+                localVarHeaderParameter['Idempotency-Key'] = String(idempotencyKey);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(audioRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Clone a reusable voice
+         * @param {VoiceCloneRequest} voiceCloneRequest 
+         * @param {string | null} [idempotencyKey] Client-generated key used to safely retry this create request. Reuse with a different body returns 409.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createVoice: async (voiceCloneRequest: VoiceCloneRequest, idempotencyKey?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'voiceCloneRequest' is not null or undefined
+            assertParamExists('createVoice', 'voiceCloneRequest', voiceCloneRequest)
+            const localVarPath = `/v1/voices`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (idempotencyKey != null) {
+                localVarHeaderParameter['Idempotency-Key'] = String(idempotencyKey);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(voiceCloneRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Estimate a speech request
+         * @param {AudioRequest} audioRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        estimateAudio: async (audioRequest: AudioRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'audioRequest' is not null or undefined
+            assertParamExists('estimateAudio', 'audioRequest', audioRequest)
+            const localVarPath = `/v1/audio/estimate`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(audioRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Estimate voice cloning
+         * @param {VoiceCloneRequest} voiceCloneRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        estimateVoice: async (voiceCloneRequest: VoiceCloneRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'voiceCloneRequest' is not null or undefined
+            assertParamExists('estimateVoice', 'voiceCloneRequest', voiceCloneRequest)
+            const localVarPath = `/v1/voices/estimate`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(voiceCloneRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Retrieve a speech task
+         * @param {string} audioId Opaque speech task id.
+         * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAudio: async (audioId: string, ifNoneMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'audioId' is not null or undefined
+            assertParamExists('getAudio', 'audioId', audioId)
+            const localVarPath = `/v1/audio/{audio_id}`
+                .replace('{audio_id}', encodeURIComponent(String(audioId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifNoneMatch != null) {
+                localVarHeaderParameter['If-None-Match'] = String(ifNoneMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Retrieve a voice or clone task
+         * @param {string} voiceId Gateway voice id.
+         * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVoice: async (voiceId: string, ifNoneMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'voiceId' is not null or undefined
+            assertParamExists('getVoice', 'voiceId', voiceId)
+            const localVarPath = `/v1/voices/{voice_id}`
+                .replace('{voice_id}', encodeURIComponent(String(voiceId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifNoneMatch != null) {
+                localVarHeaderParameter['If-None-Match'] = String(ifNoneMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List usable voice presets and owned clones
+         * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listVoices: async (ifNoneMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/voices`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifNoneMatch != null) {
+                localVarHeaderParameter['If-None-Match'] = String(ifNoneMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * AudioApi - functional programming interface
+ */
+export const AudioApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AudioApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Create a speech task
+         * @param {AudioRequest} audioRequest 
+         * @param {string | null} [idempotencyKey] Client-generated key used to safely retry this create request. Reuse with a different body returns 409.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createAudio(audioRequest: AudioRequest, idempotencyKey?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AudioTaskResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createAudio(audioRequest, idempotencyKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AudioApi.createAudio']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Clone a reusable voice
+         * @param {VoiceCloneRequest} voiceCloneRequest 
+         * @param {string | null} [idempotencyKey] Client-generated key used to safely retry this create request. Reuse with a different body returns 409.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createVoice(voiceCloneRequest: VoiceCloneRequest, idempotencyKey?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VoiceResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createVoice(voiceCloneRequest, idempotencyKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AudioApi.createVoice']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Estimate a speech request
+         * @param {AudioRequest} audioRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async estimateAudio(audioRequest: AudioRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EstimateResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.estimateAudio(audioRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AudioApi.estimateAudio']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Estimate voice cloning
+         * @param {VoiceCloneRequest} voiceCloneRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async estimateVoice(voiceCloneRequest: VoiceCloneRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EstimateResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.estimateVoice(voiceCloneRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AudioApi.estimateVoice']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Retrieve a speech task
+         * @param {string} audioId Opaque speech task id.
+         * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAudio(audioId: string, ifNoneMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AudioTaskResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAudio(audioId, ifNoneMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AudioApi.getAudio']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Retrieve a voice or clone task
+         * @param {string} voiceId Gateway voice id.
+         * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getVoice(voiceId: string, ifNoneMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VoiceResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getVoice(voiceId, ifNoneMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AudioApi.getVoice']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List usable voice presets and owned clones
+         * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listVoices(ifNoneMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VoiceListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listVoices(ifNoneMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AudioApi.listVoices']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * AudioApi - factory interface
+ */
+export const AudioApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AudioApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create a speech task
+         * @param {AudioRequest} audioRequest 
+         * @param {string | null} [idempotencyKey] Client-generated key used to safely retry this create request. Reuse with a different body returns 409.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createAudio(audioRequest: AudioRequest, idempotencyKey?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<AudioTaskResponse> {
+            return localVarFp.createAudio(audioRequest, idempotencyKey, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Clone a reusable voice
+         * @param {VoiceCloneRequest} voiceCloneRequest 
+         * @param {string | null} [idempotencyKey] Client-generated key used to safely retry this create request. Reuse with a different body returns 409.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createVoice(voiceCloneRequest: VoiceCloneRequest, idempotencyKey?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<VoiceResponse> {
+            return localVarFp.createVoice(voiceCloneRequest, idempotencyKey, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Estimate a speech request
+         * @param {AudioRequest} audioRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        estimateAudio(audioRequest: AudioRequest, options?: RawAxiosRequestConfig): AxiosPromise<EstimateResponse> {
+            return localVarFp.estimateAudio(audioRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Estimate voice cloning
+         * @param {VoiceCloneRequest} voiceCloneRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        estimateVoice(voiceCloneRequest: VoiceCloneRequest, options?: RawAxiosRequestConfig): AxiosPromise<EstimateResponse> {
+            return localVarFp.estimateVoice(voiceCloneRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Retrieve a speech task
+         * @param {string} audioId Opaque speech task id.
+         * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAudio(audioId: string, ifNoneMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<AudioTaskResponse> {
+            return localVarFp.getAudio(audioId, ifNoneMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Retrieve a voice or clone task
+         * @param {string} voiceId Gateway voice id.
+         * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVoice(voiceId: string, ifNoneMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<VoiceResponse> {
+            return localVarFp.getVoice(voiceId, ifNoneMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List usable voice presets and owned clones
+         * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listVoices(ifNoneMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<VoiceListResponse> {
+            return localVarFp.listVoices(ifNoneMatch, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * AudioApi - object-oriented interface
+ */
+export class AudioApi extends BaseAPI {
+    /**
+     * 
+     * @summary Create a speech task
+     * @param {AudioRequest} audioRequest 
+     * @param {string | null} [idempotencyKey] Client-generated key used to safely retry this create request. Reuse with a different body returns 409.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public createAudio(audioRequest: AudioRequest, idempotencyKey?: string | null, options?: RawAxiosRequestConfig) {
+        return AudioApiFp(this.configuration).createAudio(audioRequest, idempotencyKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Clone a reusable voice
+     * @param {VoiceCloneRequest} voiceCloneRequest 
+     * @param {string | null} [idempotencyKey] Client-generated key used to safely retry this create request. Reuse with a different body returns 409.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public createVoice(voiceCloneRequest: VoiceCloneRequest, idempotencyKey?: string | null, options?: RawAxiosRequestConfig) {
+        return AudioApiFp(this.configuration).createVoice(voiceCloneRequest, idempotencyKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Estimate a speech request
+     * @param {AudioRequest} audioRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public estimateAudio(audioRequest: AudioRequest, options?: RawAxiosRequestConfig) {
+        return AudioApiFp(this.configuration).estimateAudio(audioRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Estimate voice cloning
+     * @param {VoiceCloneRequest} voiceCloneRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public estimateVoice(voiceCloneRequest: VoiceCloneRequest, options?: RawAxiosRequestConfig) {
+        return AudioApiFp(this.configuration).estimateVoice(voiceCloneRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Retrieve a speech task
+     * @param {string} audioId Opaque speech task id.
+     * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getAudio(audioId: string, ifNoneMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return AudioApiFp(this.configuration).getAudio(audioId, ifNoneMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Retrieve a voice or clone task
+     * @param {string} voiceId Gateway voice id.
+     * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getVoice(voiceId: string, ifNoneMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return AudioApiFp(this.configuration).getVoice(voiceId, ifNoneMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List usable voice presets and owned clones
+     * @param {string | null} [ifNoneMatch] Previously returned ETag; unchanged resources return 304.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public listVoices(ifNoneMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return AudioApiFp(this.configuration).listVoices(ifNoneMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
 
 
 /**
@@ -1408,12 +2177,14 @@ export const ListModelLimitsModalityEnum = {
     Image: 'image',
     Video: 'video',
     Music: 'music',
+    Audio: 'audio',
 } as const;
 export type ListModelLimitsModalityEnum = typeof ListModelLimitsModalityEnum[keyof typeof ListModelLimitsModalityEnum];
 export const ListModelsModalityEnum = {
     Image: 'image',
     Video: 'video',
     Music: 'music',
+    Audio: 'audio',
 } as const;
 export type ListModelsModalityEnum = typeof ListModelsModalityEnum[keyof typeof ListModelsModalityEnum];
 

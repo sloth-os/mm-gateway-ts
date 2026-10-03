@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **cost_source** | **string** |  | [optional] [default to undefined]
 **currency** | **string** |  | [optional] [default to undefined]
 **duration_seconds** | **number** |  | [optional] [default to undefined]
+**input_characters** | **number** |  | [optional] [default to undefined]
 **input_tokens** | **number** |  | [optional] [default to undefined]
 **output_count** | **number** |  | [optional] [default to undefined]
 **output_tokens** | **number** |  | [optional] [default to undefined]
@@ -25,6 +26,7 @@ const instance: Usage = {
     cost_source,
     currency,
     duration_seconds,
+    input_characters,
     input_tokens,
     output_count,
     output_tokens,

@@ -6,6 +6,11 @@ api.ts
 base.ts
 common.ts
 configuration.ts
+docs/AudioApi.md
+docs/AudioOutput.md
+docs/AudioParameters.md
+docs/AudioRequest.md
+docs/AudioTaskResponse.md
 docs/BudgetDirective.md
 docs/BudgetState.md
 docs/Dimensions.md
@@ -54,6 +59,12 @@ docs/VideoParameters.md
 docs/VideoRequest.md
 docs/VideoTaskResponse.md
 docs/VideosApi.md
+docs/VoiceCloneRequest.md
+docs/VoiceConsent.md
+docs/VoiceListResponse.md
+docs/VoiceParameters.md
+docs/VoiceResponse.md
+docs/VoiceSampleInput.md
 git_push.sh
 index.ts
 package.json

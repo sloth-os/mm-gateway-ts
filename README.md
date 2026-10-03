@@ -51,6 +51,13 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+*AudioApi* | [**createAudio**](docs/AudioApi.md#createaudio) | **POST** /v1/audio | Create a speech task
+*AudioApi* | [**createVoice**](docs/AudioApi.md#createvoice) | **POST** /v1/voices | Clone a reusable voice
+*AudioApi* | [**estimateAudio**](docs/AudioApi.md#estimateaudio) | **POST** /v1/audio/estimate | Estimate a speech request
+*AudioApi* | [**estimateVoice**](docs/AudioApi.md#estimatevoice) | **POST** /v1/voices/estimate | Estimate voice cloning
+*AudioApi* | [**getAudio**](docs/AudioApi.md#getaudio) | **GET** /v1/audio/{audio_id} | Retrieve a speech task
+*AudioApi* | [**getVoice**](docs/AudioApi.md#getvoice) | **GET** /v1/voices/{voice_id} | Retrieve a voice or clone task
+*AudioApi* | [**listVoices**](docs/AudioApi.md#listvoices) | **GET** /v1/voices | List usable voice presets and owned clones
 *ImagesApi* | [**createImage**](docs/ImagesApi.md#createimage) | **POST** /v1/images | Create an image task
 *ImagesApi* | [**estimateImage**](docs/ImagesApi.md#estimateimage) | **POST** /v1/images/estimate | Estimate an image request
 *ImagesApi* | [**getImage**](docs/ImagesApi.md#getimage) | **GET** /v1/images/{image_id} | Retrieve an image task
@@ -76,6 +83,10 @@ Class | Method | HTTP request | Description
 
 ### Documentation For Models
 
+ - [AudioOutput](docs/AudioOutput.md)
+ - [AudioParameters](docs/AudioParameters.md)
+ - [AudioRequest](docs/AudioRequest.md)
+ - [AudioTaskResponse](docs/AudioTaskResponse.md)
  - [BudgetDirective](docs/BudgetDirective.md)
  - [BudgetState](docs/BudgetState.md)
  - [Dimensions](docs/Dimensions.md)
@@ -118,6 +129,12 @@ Class | Method | HTTP request | Description
  - [VideoParameters](docs/VideoParameters.md)
  - [VideoRequest](docs/VideoRequest.md)
  - [VideoTaskResponse](docs/VideoTaskResponse.md)
+ - [VoiceCloneRequest](docs/VoiceCloneRequest.md)
+ - [VoiceConsent](docs/VoiceConsent.md)
+ - [VoiceListResponse](docs/VoiceListResponse.md)
+ - [VoiceParameters](docs/VoiceParameters.md)
+ - [VoiceResponse](docs/VoiceResponse.md)
+ - [VoiceSampleInput](docs/VoiceSampleInput.md)
 
 
 <a id="documentation-for-authorization"></a>

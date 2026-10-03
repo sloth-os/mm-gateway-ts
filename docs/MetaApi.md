@@ -111,7 +111,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new MetaApi(configuration);
 
-let modality: 'image' | 'video' | 'music'; //Filter models by output modality. (optional) (default to undefined)
+let modality: 'image' | 'video' | 'music' | 'audio'; //Filter models by output modality. (optional) (default to undefined)
 let authorization: string; //Bearer token: \"Bearer <api-key>\". (optional) (default to undefined)
 let xRequestId: string; //Client-supplied request id (echoed back). (optional) (default to undefined)
 let ifNoneMatch: string; //Previously returned ETag; unchanged resources return 304. (optional) (default to undefined)
@@ -128,7 +128,7 @@ const { status, data } = await apiInstance.listModelLimits(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **modality** | [**&#39;image&#39; | &#39;video&#39; | &#39;music&#39;**]**Array<&#39;image&#39; &#124; &#39;video&#39; &#124; &#39;music&#39;>** | Filter models by output modality. | (optional) defaults to undefined|
+| **modality** | [**&#39;image&#39; | &#39;video&#39; | &#39;music&#39; | &#39;audio&#39;**]**Array<&#39;image&#39; &#124; &#39;video&#39; &#124; &#39;music&#39; &#124; &#39;audio&#39;>** | Filter models by output modality. | (optional) defaults to undefined|
 | **authorization** | [**string**] | Bearer token: \&quot;Bearer &lt;api-key&gt;\&quot;. | (optional) defaults to undefined|
 | **xRequestId** | [**string**] | Client-supplied request id (echoed back). | (optional) defaults to undefined|
 | **ifNoneMatch** | [**string**] | Previously returned ETag; unchanged resources return 304. | (optional) defaults to undefined|
@@ -179,7 +179,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new MetaApi(configuration);
 
-let modality: 'image' | 'video' | 'music'; //Filter models by output modality. (optional) (default to undefined)
+let modality: 'image' | 'video' | 'music' | 'audio'; //Filter models by output modality. (optional) (default to undefined)
 let authorization: string; //Bearer token: \"Bearer <api-key>\". (optional) (default to undefined)
 let xRequestId: string; //Client-supplied request id (echoed back). (optional) (default to undefined)
 let ifNoneMatch: string; //Previously returned ETag; unchanged resources return 304. (optional) (default to undefined)
@@ -196,7 +196,7 @@ const { status, data } = await apiInstance.listModels(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **modality** | [**&#39;image&#39; | &#39;video&#39; | &#39;music&#39;**]**Array<&#39;image&#39; &#124; &#39;video&#39; &#124; &#39;music&#39;>** | Filter models by output modality. | (optional) defaults to undefined|
+| **modality** | [**&#39;image&#39; | &#39;video&#39; | &#39;music&#39; | &#39;audio&#39;**]**Array<&#39;image&#39; &#124; &#39;video&#39; &#124; &#39;music&#39; &#124; &#39;audio&#39;>** | Filter models by output modality. | (optional) defaults to undefined|
 | **authorization** | [**string**] | Bearer token: \&quot;Bearer &lt;api-key&gt;\&quot;. | (optional) defaults to undefined|
 | **xRequestId** | [**string**] | Client-supplied request id (echoed back). | (optional) defaults to undefined|
 | **ifNoneMatch** | [**string**] | Previously returned ETag; unchanged resources return 304. | (optional) defaults to undefined|
