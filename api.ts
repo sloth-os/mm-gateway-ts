@@ -113,6 +113,22 @@ export const AudioTaskResponseStatusEnum = {
 
 export type AudioTaskResponseStatusEnum = typeof AudioTaskResponseStatusEnum[keyof typeof AudioTaskResponseStatusEnum];
 
+export interface BackendCredential {
+    'api_key'?: string | null;
+    'base_url'?: string | null;
+    'extra'?: { [key: string]: any; };
+    'id': string;
+}
+export interface BackendRuntime {
+    'accounts': Array<string>;
+    'active': boolean;
+    'configured': boolean;
+    'enabled': boolean;
+    'models': { [key: string]: Array<string>; };
+    'name': string;
+    'tags': Array<string>;
+    'type': string;
+}
 /**
  * A client-chosen spend bucket within the key, optionally self-capped.
  */
@@ -138,6 +154,11 @@ export interface BudgetState {
     'scope'?: string | null;
     'spent_usd'?: number;
     'tasks'?: number | null;
+}
+export interface CounterSample {
+    'labels': { [key: string]: string; };
+    'name': string;
+    'value': number;
 }
 /**
  * Exact output dimensions in pixels.
@@ -213,6 +234,15 @@ export const HealthResponseStatusEnum = {
 
 export type HealthResponseStatusEnum = typeof HealthResponseStatusEnum[keyof typeof HealthResponseStatusEnum];
 
+export interface HistogramSample {
+    'count': number;
+    'labels': { [key: string]: string; };
+    'max': number;
+    'mean': number;
+    'min': number;
+    'name': string;
+    'sum': number;
+}
 export interface ImageInput {
     'type': ImageInputTypeEnum;
     /**
@@ -335,6 +365,212 @@ export const LyricsInputTypeEnum = {
 } as const;
 
 export type LyricsInputTypeEnum = typeof LyricsInputTypeEnum[keyof typeof LyricsInputTypeEnum];
+
+export interface ManagedBackend {
+    'api_key'?: string | null;
+    'base_url'?: string | null;
+    'credentials'?: Array<BackendCredential>;
+    'enabled'?: boolean;
+    'extra'?: { [key: string]: any; };
+    'name': string;
+    'tags'?: Array<string>;
+    'type': string;
+}
+export interface ManagedBudget {
+    'limit_usd'?: number | null;
+    'period'?: ManagedBudgetPeriodEnum;
+    'scopes_limit_usd'?: number | null;
+}
+
+export const ManagedBudgetPeriodEnum = {
+    Day: 'day',
+    Month: 'month',
+    Total: 'total',
+} as const;
+
+export type ManagedBudgetPeriodEnum = typeof ManagedBudgetPeriodEnum[keyof typeof ManagedBudgetPeriodEnum];
+
+export interface ManagedKey {
+    'allow_backends'?: Array<string>;
+    'allow_tags'?: Array<string>;
+    'budget'?: ManagedBudget | null;
+    'default_audio_backend'?: string | null;
+    'default_audio_tag'?: string | null;
+    'default_image_backend'?: string | null;
+    'default_image_tag'?: string | null;
+    'default_music_backend'?: string | null;
+    'default_music_tag'?: string | null;
+    'default_video_backend'?: string | null;
+    'default_video_tag'?: string | null;
+    'deny_tags'?: Array<string>;
+    'enabled'?: boolean;
+    'extra'?: { [key: string]: any; };
+    'id': string;
+    'key': string;
+}
+export interface ManagedProxy {
+    'accounts'?: Array<ProxyAccount>;
+    'base_url': string;
+    'domain'?: string | null;
+    'enabled'?: boolean;
+    'headers'?: { [key: string]: string; };
+    'outbound_proxy'?: string | null;
+    'tags'?: Array<string>;
+    'timeout'?: number;
+}
+export interface ManagedRoutingProfile {
+    'fallback'?: ManagedRoutingProfileFallbackEnum | null;
+    'max_cost_usd'?: number | null;
+    'optimize'?: ManagedRoutingProfileOptimizeEnum | null;
+    'tags'?: Array<string>;
+}
+
+export const ManagedRoutingProfileFallbackEnum = {
+    None: 'none',
+    SameModel: 'same_model',
+    Any: 'any',
+} as const;
+
+export type ManagedRoutingProfileFallbackEnum = typeof ManagedRoutingProfileFallbackEnum[keyof typeof ManagedRoutingProfileFallbackEnum];
+export const ManagedRoutingProfileOptimizeEnum = {
+    Balanced: 'balanced',
+    Cost: 'cost',
+    Latency: 'latency',
+} as const;
+
+export type ManagedRoutingProfileOptimizeEnum = typeof ManagedRoutingProfileOptimizeEnum[keyof typeof ManagedRoutingProfileOptimizeEnum];
+
+export interface ManagedTask {
+    'backend': string;
+    'completed_at'?: number | null;
+    'created_at': number;
+    'id': string;
+    'modality': ManagedTaskModalityEnum;
+    'model': string;
+    'owner_key_id': string;
+    'status': ManagedTaskStatusEnum;
+}
+
+export const ManagedTaskModalityEnum = {
+    Image: 'image',
+    Video: 'video',
+    Music: 'music',
+    Audio: 'audio',
+    Voice: 'voice',
+} as const;
+
+export type ManagedTaskModalityEnum = typeof ManagedTaskModalityEnum[keyof typeof ManagedTaskModalityEnum];
+export const ManagedTaskStatusEnum = {
+    Pending: 'pending',
+    Running: 'running',
+    Succeeded: 'succeeded',
+    Failed: 'failed',
+    Cancelled: 'cancelled',
+    Expired: 'expired',
+} as const;
+
+export type ManagedTaskStatusEnum = typeof ManagedTaskStatusEnum[keyof typeof ManagedTaskStatusEnum];
+
+export interface ManagedUsage {
+    'enabled': boolean;
+    'key_id': string;
+    'usage': UsageResponse;
+}
+export interface ManagementConfigInput {
+    'backends'?: Array<ManagedBackend>;
+    'budget_allow_unpriced'?: boolean;
+    'catalog_models'?: { [key: string]: any; };
+    'keys'?: Array<ManagedKey>;
+    'outbound_proxy'?: string | null;
+    'proxies'?: Array<ManagedProxy>;
+    'routing_default_optimize'?: ManagementConfigInputRoutingDefaultOptimizeEnum;
+    'routing_profiles'?: { [key: string]: ManagedRoutingProfile; };
+}
+
+export const ManagementConfigInputRoutingDefaultOptimizeEnum = {
+    Balanced: 'balanced',
+    Cost: 'cost',
+    Latency: 'latency',
+} as const;
+
+export type ManagementConfigInputRoutingDefaultOptimizeEnum = typeof ManagementConfigInputRoutingDefaultOptimizeEnum[keyof typeof ManagementConfigInputRoutingDefaultOptimizeEnum];
+
+export interface ManagementConfigOutput {
+    'backends'?: Array<ManagedBackend>;
+    'budget_allow_unpriced'?: boolean;
+    'catalog_models'?: { [key: string]: any; };
+    'keys'?: Array<ManagedKey>;
+    'outbound_proxy'?: string | null;
+    'proxies'?: Array<ManagedProxy>;
+    'routing_default_optimize'?: ManagementConfigOutputRoutingDefaultOptimizeEnum;
+    'routing_profiles'?: { [key: string]: ManagedRoutingProfile; };
+}
+
+export const ManagementConfigOutputRoutingDefaultOptimizeEnum = {
+    Balanced: 'balanced',
+    Cost: 'cost',
+    Latency: 'latency',
+} as const;
+
+export type ManagementConfigOutputRoutingDefaultOptimizeEnum = typeof ManagementConfigOutputRoutingDefaultOptimizeEnum[keyof typeof ManagementConfigOutputRoutingDefaultOptimizeEnum];
+
+export interface ManagementConfigResponse {
+    'config': ManagementConfigOutput;
+    'persistent': boolean;
+    'revision': string;
+}
+export interface ManagementMetrics {
+    'collected_at': string;
+    'counters': Array<CounterSample>;
+    'enabled': boolean;
+    'histograms': Array<HistogramSample>;
+    'selection': Array<SelectionHealth>;
+}
+export interface ManagementStatus {
+    'backend_types': Array<string>;
+    'backends': Array<BackendRuntime>;
+    'enabled_keys_count': number;
+    'keys_count': number;
+    'metrics_enabled': boolean;
+    'persistent': boolean;
+    'proxies': Array<ProxyRuntime>;
+    'revision': string;
+    'status'?: ManagementStatusStatusEnum;
+    'tasks_by_status': { [key: string]: number; };
+    'uptime_seconds': number;
+    'version': string;
+}
+
+export const ManagementStatusStatusEnum = {
+    Ok: 'ok',
+} as const;
+
+export type ManagementStatusStatusEnum = typeof ManagementStatusStatusEnum[keyof typeof ManagementStatusStatusEnum];
+
+export interface ManagementTaskList {
+    'data': Array<ManagedTask>;
+    'limit': number;
+    'object'?: ManagementTaskListObjectEnum;
+    'offset': number;
+    'total': number;
+}
+
+export const ManagementTaskListObjectEnum = {
+    List: 'list',
+} as const;
+
+export type ManagementTaskListObjectEnum = typeof ManagementTaskListObjectEnum[keyof typeof ManagementTaskListObjectEnum];
+
+export interface ManagementUsageList {
+    'data': Array<ManagedUsage>;
+    'object'?: ManagementUsageListObjectEnum;
+}
+
+export const ManagementUsageListObjectEnum = {
+    List: 'list',
+} as const;
+
+export type ManagementUsageListObjectEnum = typeof ManagementUsageListObjectEnum[keyof typeof ManagementUsageListObjectEnum];
 
 export interface ModelEntry {
     [key: string]: any;
@@ -597,6 +833,16 @@ export interface ProblemDetail {
      */
     'type': string;
 }
+export interface ProxyAccount {
+    'headers'?: { [key: string]: string; };
+    'id': string;
+}
+export interface ProxyRuntime {
+    'accounts': Array<string>;
+    'active': boolean;
+    'domain': string;
+    'enabled': boolean;
+}
 export interface ResourceLinks {
     [key: string]: any;
 
@@ -656,6 +902,17 @@ export interface RoutingInfo {
     'fallback_reason'?: string | null;
     'optimize'?: string;
     'requested_model': string;
+}
+export interface SelectionHealth {
+    'account': string;
+    'attempts': number;
+    'backend': string;
+    'cooldown_remaining_s': number;
+    'latency_s': number | null;
+    'modality': string;
+    'model': string | null;
+    'rate_limited': boolean;
+    'success_rate': number | null;
 }
 export interface TaskError {
     [key: string]: any;
@@ -1830,6 +2087,1015 @@ export class ImagesApi extends BaseAPI {
     }
 }
 
+
+
+/**
+ * ManagementApi - axios parameter creator
+ */
+export const ManagementApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * 
+         * @summary Delete Backend
+         * @param {string} name 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteManagementBackend: async (name: string, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('deleteManagementBackend', 'name', name)
+            const localVarPath = `/v1/management/backends/{name}`
+                .replace('{name}', encodeURIComponent(String(name)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Key
+         * @param {string} keyId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteManagementKey: async (keyId: string, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'keyId' is not null or undefined
+            assertParamExists('deleteManagementKey', 'keyId', keyId)
+            const localVarPath = `/v1/management/keys/{key_id}`
+                .replace('{key_id}', encodeURIComponent(String(keyId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete Proxy
+         * @param {string} domain 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteManagementProxy: async (domain: string, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'domain' is not null or undefined
+            assertParamExists('deleteManagementProxy', 'domain', domain)
+            const localVarPath = `/v1/management/proxies/{domain}`
+                .replace('{domain}', encodeURIComponent(String(domain)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Config
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getManagementConfig: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/management/config`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Metrics
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getManagementMetrics: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/management/metrics`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Status
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getManagementStatus: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/management/status`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Tasks
+         * @param {ListManagementTasksModalityEnum} [modality] 
+         * @param {ListManagementTasksStatusEnum} [status] 
+         * @param {string | null} [keyId] 
+         * @param {string | null} [backend] 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listManagementTasks: async (modality?: ListManagementTasksModalityEnum, status?: ListManagementTasksStatusEnum, keyId?: string | null, backend?: string | null, offset?: number, limit?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/management/tasks`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (modality !== undefined) {
+                localVarQueryParameter['modality'] = modality;
+            }
+
+            if (status !== undefined) {
+                localVarQueryParameter['status'] = status;
+            }
+
+            if (keyId !== undefined) {
+                localVarQueryParameter['key_id'] = keyId;
+            }
+
+            if (backend !== undefined) {
+                localVarQueryParameter['backend'] = backend;
+            }
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List Usage
+         * @param {string | null} [keyId] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listManagementUsage: async (keyId?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/management/usage`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (keyId !== undefined) {
+                localVarQueryParameter['key_id'] = keyId;
+            }
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Put Backend
+         * @param {string} name 
+         * @param {ManagedBackend} managedBackend 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putManagementBackend: async (name: string, managedBackend: ManagedBackend, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'name' is not null or undefined
+            assertParamExists('putManagementBackend', 'name', name)
+            // verify required parameter 'managedBackend' is not null or undefined
+            assertParamExists('putManagementBackend', 'managedBackend', managedBackend)
+            const localVarPath = `/v1/management/backends/{name}`
+                .replace('{name}', encodeURIComponent(String(name)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(managedBackend, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Put Key
+         * @param {string} keyId 
+         * @param {ManagedKey} managedKey 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putManagementKey: async (keyId: string, managedKey: ManagedKey, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'keyId' is not null or undefined
+            assertParamExists('putManagementKey', 'keyId', keyId)
+            // verify required parameter 'managedKey' is not null or undefined
+            assertParamExists('putManagementKey', 'managedKey', managedKey)
+            const localVarPath = `/v1/management/keys/{key_id}`
+                .replace('{key_id}', encodeURIComponent(String(keyId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(managedKey, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Put Proxy
+         * @param {string} domain 
+         * @param {ManagedProxy} managedProxy 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putManagementProxy: async (domain: string, managedProxy: ManagedProxy, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'domain' is not null or undefined
+            assertParamExists('putManagementProxy', 'domain', domain)
+            // verify required parameter 'managedProxy' is not null or undefined
+            assertParamExists('putManagementProxy', 'managedProxy', managedProxy)
+            const localVarPath = `/v1/management/proxies/{domain}`
+                .replace('{domain}', encodeURIComponent(String(domain)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(managedProxy, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Replace Config
+         * @param {ManagementConfigInput} managementConfigInput 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        replaceManagementConfig: async (managementConfigInput: ManagementConfigInput, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'managementConfigInput' is not null or undefined
+            assertParamExists('replaceManagementConfig', 'managementConfigInput', managementConfigInput)
+            const localVarPath = `/v1/management/config`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(managementConfigInput, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ManagementApi - functional programming interface
+ */
+export const ManagementApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ManagementApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Delete Backend
+         * @param {string} name 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteManagementBackend(name: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementConfigResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteManagementBackend(name, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.deleteManagementBackend']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Key
+         * @param {string} keyId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteManagementKey(keyId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementConfigResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteManagementKey(keyId, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.deleteManagementKey']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete Proxy
+         * @param {string} domain 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteManagementProxy(domain: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementConfigResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteManagementProxy(domain, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.deleteManagementProxy']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Config
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getManagementConfig(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementConfigResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getManagementConfig(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.getManagementConfig']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Metrics
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getManagementMetrics(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementMetrics>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getManagementMetrics(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.getManagementMetrics']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Status
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getManagementStatus(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementStatus>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getManagementStatus(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.getManagementStatus']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Tasks
+         * @param {ListManagementTasksModalityEnum} [modality] 
+         * @param {ListManagementTasksStatusEnum} [status] 
+         * @param {string | null} [keyId] 
+         * @param {string | null} [backend] 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listManagementTasks(modality?: ListManagementTasksModalityEnum, status?: ListManagementTasksStatusEnum, keyId?: string | null, backend?: string | null, offset?: number, limit?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementTaskList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listManagementTasks(modality, status, keyId, backend, offset, limit, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.listManagementTasks']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List Usage
+         * @param {string | null} [keyId] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listManagementUsage(keyId?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementUsageList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listManagementUsage(keyId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.listManagementUsage']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Put Backend
+         * @param {string} name 
+         * @param {ManagedBackend} managedBackend 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putManagementBackend(name: string, managedBackend: ManagedBackend, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementConfigResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putManagementBackend(name, managedBackend, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.putManagementBackend']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Put Key
+         * @param {string} keyId 
+         * @param {ManagedKey} managedKey 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putManagementKey(keyId: string, managedKey: ManagedKey, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementConfigResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putManagementKey(keyId, managedKey, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.putManagementKey']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Put Proxy
+         * @param {string} domain 
+         * @param {ManagedProxy} managedProxy 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putManagementProxy(domain: string, managedProxy: ManagedProxy, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementConfigResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putManagementProxy(domain, managedProxy, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.putManagementProxy']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Replace Config
+         * @param {ManagementConfigInput} managementConfigInput 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async replaceManagementConfig(managementConfigInput: ManagementConfigInput, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementConfigResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.replaceManagementConfig(managementConfigInput, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.replaceManagementConfig']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * ManagementApi - factory interface
+ */
+export const ManagementApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ManagementApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Delete Backend
+         * @param {string} name 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteManagementBackend(name: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
+            return localVarFp.deleteManagementBackend(name, ifMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Key
+         * @param {string} keyId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteManagementKey(keyId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
+            return localVarFp.deleteManagementKey(keyId, ifMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete Proxy
+         * @param {string} domain 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteManagementProxy(domain: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
+            return localVarFp.deleteManagementProxy(domain, ifMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Config
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getManagementConfig(options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
+            return localVarFp.getManagementConfig(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Metrics
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getManagementMetrics(options?: RawAxiosRequestConfig): AxiosPromise<ManagementMetrics> {
+            return localVarFp.getManagementMetrics(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Status
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getManagementStatus(options?: RawAxiosRequestConfig): AxiosPromise<ManagementStatus> {
+            return localVarFp.getManagementStatus(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Tasks
+         * @param {ListManagementTasksModalityEnum} [modality] 
+         * @param {ListManagementTasksStatusEnum} [status] 
+         * @param {string | null} [keyId] 
+         * @param {string | null} [backend] 
+         * @param {number} [offset] 
+         * @param {number} [limit] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listManagementTasks(modality?: ListManagementTasksModalityEnum, status?: ListManagementTasksStatusEnum, keyId?: string | null, backend?: string | null, offset?: number, limit?: number, options?: RawAxiosRequestConfig): AxiosPromise<ManagementTaskList> {
+            return localVarFp.listManagementTasks(modality, status, keyId, backend, offset, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List Usage
+         * @param {string | null} [keyId] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listManagementUsage(keyId?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementUsageList> {
+            return localVarFp.listManagementUsage(keyId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Put Backend
+         * @param {string} name 
+         * @param {ManagedBackend} managedBackend 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putManagementBackend(name: string, managedBackend: ManagedBackend, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
+            return localVarFp.putManagementBackend(name, managedBackend, ifMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Put Key
+         * @param {string} keyId 
+         * @param {ManagedKey} managedKey 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putManagementKey(keyId: string, managedKey: ManagedKey, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
+            return localVarFp.putManagementKey(keyId, managedKey, ifMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Put Proxy
+         * @param {string} domain 
+         * @param {ManagedProxy} managedProxy 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putManagementProxy(domain: string, managedProxy: ManagedProxy, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
+            return localVarFp.putManagementProxy(domain, managedProxy, ifMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Replace Config
+         * @param {ManagementConfigInput} managementConfigInput 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        replaceManagementConfig(managementConfigInput: ManagementConfigInput, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
+            return localVarFp.replaceManagementConfig(managementConfigInput, ifMatch, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ManagementApi - object-oriented interface
+ */
+export class ManagementApi extends BaseAPI {
+    /**
+     * 
+     * @summary Delete Backend
+     * @param {string} name 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public deleteManagementBackend(name: string, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).deleteManagementBackend(name, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Key
+     * @param {string} keyId 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public deleteManagementKey(keyId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).deleteManagementKey(keyId, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Delete Proxy
+     * @param {string} domain 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public deleteManagementProxy(domain: string, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).deleteManagementProxy(domain, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Config
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getManagementConfig(options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).getManagementConfig(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Metrics
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getManagementMetrics(options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).getManagementMetrics(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Status
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getManagementStatus(options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).getManagementStatus(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Tasks
+     * @param {ListManagementTasksModalityEnum} [modality] 
+     * @param {ListManagementTasksStatusEnum} [status] 
+     * @param {string | null} [keyId] 
+     * @param {string | null} [backend] 
+     * @param {number} [offset] 
+     * @param {number} [limit] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public listManagementTasks(modality?: ListManagementTasksModalityEnum, status?: ListManagementTasksStatusEnum, keyId?: string | null, backend?: string | null, offset?: number, limit?: number, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).listManagementTasks(modality, status, keyId, backend, offset, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary List Usage
+     * @param {string | null} [keyId] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public listManagementUsage(keyId?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).listManagementUsage(keyId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Put Backend
+     * @param {string} name 
+     * @param {ManagedBackend} managedBackend 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public putManagementBackend(name: string, managedBackend: ManagedBackend, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).putManagementBackend(name, managedBackend, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Put Key
+     * @param {string} keyId 
+     * @param {ManagedKey} managedKey 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public putManagementKey(keyId: string, managedKey: ManagedKey, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).putManagementKey(keyId, managedKey, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Put Proxy
+     * @param {string} domain 
+     * @param {ManagedProxy} managedProxy 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public putManagementProxy(domain: string, managedProxy: ManagedProxy, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).putManagementProxy(domain, managedProxy, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Replace Config
+     * @param {ManagementConfigInput} managementConfigInput 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public replaceManagementConfig(managementConfigInput: ManagementConfigInput, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).replaceManagementConfig(managementConfigInput, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+export const ListManagementTasksModalityEnum = {
+    Image: 'image',
+    Video: 'video',
+    Music: 'music',
+    Audio: 'audio',
+    Voice: 'voice',
+} as const;
+export type ListManagementTasksModalityEnum = typeof ListManagementTasksModalityEnum[keyof typeof ListManagementTasksModalityEnum];
+export const ListManagementTasksStatusEnum = {
+    Pending: 'pending',
+    Running: 'running',
+    Succeeded: 'succeeded',
+    Failed: 'failed',
+    Cancelled: 'cancelled',
+    Expired: 'expired',
+} as const;
+export type ListManagementTasksStatusEnum = typeof ListManagementTasksStatusEnum[keyof typeof ListManagementTasksStatusEnum];
 
 
 /**
