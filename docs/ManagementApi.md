@@ -6,18 +6,24 @@ All URIs are relative to *http://localhost*
 |------------- | ------------- | -------------|
 |[**deleteManagementBackend**](#deletemanagementbackend) | **DELETE** /v1/management/backends/{name} | Delete Backend|
 |[**deleteManagementKey**](#deletemanagementkey) | **DELETE** /v1/management/keys/{key_id} | Delete Key|
+|[**deleteManagementPlugin**](#deletemanagementplugin) | **DELETE** /v1/management/plugins/{plugin_id} | Delete Plugin|
 |[**deleteManagementProxy**](#deletemanagementproxy) | **DELETE** /v1/management/proxies/{domain} | Delete Proxy|
 |[**discoverManagementBackendModels**](#discovermanagementbackendmodels) | **POST** /v1/management/backends/discover-models | Discover Backend Models|
 |[**getManagementBuiltinModels**](#getmanagementbuiltinmodels) | **GET** /v1/management/backend-types/{provider_type}/models | Get Builtin Models|
 |[**getManagementConfig**](#getmanagementconfig) | **GET** /v1/management/config | Get Config|
 |[**getManagementMetrics**](#getmanagementmetrics) | **GET** /v1/management/metrics | Get Metrics|
+|[**getManagementPluginStore**](#getmanagementpluginstore) | **GET** /v1/management/plugins | Get Store|
 |[**getManagementStatus**](#getmanagementstatus) | **GET** /v1/management/status | Get Status|
+|[**installManagementGitHubPlugin**](#installmanagementgithubplugin) | **POST** /v1/management/plugins/install | Install Github|
 |[**listManagementTasks**](#listmanagementtasks) | **GET** /v1/management/tasks | List Tasks|
 |[**listManagementUsage**](#listmanagementusage) | **GET** /v1/management/usage | List Usage|
 |[**putManagementBackend**](#putmanagementbackend) | **PUT** /v1/management/backends/{name} | Put Backend|
 |[**putManagementKey**](#putmanagementkey) | **PUT** /v1/management/keys/{key_id} | Put Key|
+|[**putManagementPlugin**](#putmanagementplugin) | **PUT** /v1/management/plugins/{plugin_id} | Put Plugin|
 |[**putManagementProxy**](#putmanagementproxy) | **PUT** /v1/management/proxies/{domain} | Put Proxy|
+|[**reloadManagementPlugin**](#reloadmanagementplugin) | **POST** /v1/management/plugins/{plugin_id}/reload | Reload Plugin|
 |[**replaceManagementConfig**](#replacemanagementconfig) | **PUT** /v1/management/config | Replace Config|
+|[**updateManagementGitHubPlugin**](#updatemanagementgithubplugin) | **POST** /v1/management/plugins/{plugin_id}/update | Update Plugin|
 
 # **deleteManagementBackend**
 > ManagementConfigResponse deleteManagementBackend()
@@ -113,6 +119,66 @@ const { status, data } = await apiInstance.deleteManagementKey(
 ### Return type
 
 **ManagementConfigResponse**
+
+### Authorization
+
+[ManagementAuth](../README.md#ManagementAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json, application/problem+json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+|**401** | Missing or unknown API key (unauthorized). |  -  |
+|**404** | Model or task not found. |  -  |
+|**412** | Configuration changed; reload before saving. |  -  |
+|**422** | Validation Error |  -  |
+|**428** | A current If-Match revision is required. |  -  |
+|**503** | No usable generation service is configured. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **deleteManagementPlugin**
+> PluginStore deleteManagementPlugin()
+
+Uninstall, releasing old generations after their in-flight requests complete.
+
+### Example
+
+```typescript
+import {
+    ManagementApi,
+    Configuration
+} from 'mm-gateway-ts';
+
+const configuration = new Configuration();
+const apiInstance = new ManagementApi(configuration);
+
+let pluginId: string; // (default to undefined)
+let ifMatch: string; //Current configuration revision (ETag). (optional) (default to undefined)
+
+const { status, data } = await apiInstance.deleteManagementPlugin(
+    pluginId,
+    ifMatch
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **pluginId** | [**string**] |  | defaults to undefined|
+| **ifMatch** | [**string**] | Current configuration revision (ETag). | (optional) defaults to undefined|
+
+
+### Return type
+
+**PluginStore**
 
 ### Authorization
 
@@ -400,6 +466,54 @@ This endpoint does not have any parameters.
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **getManagementPluginStore**
+> PluginStore getManagementPluginStore()
+
+Discover bundled, local and installed GitHub plugins without executing them.
+
+### Example
+
+```typescript
+import {
+    ManagementApi,
+    Configuration
+} from 'mm-gateway-ts';
+
+const configuration = new Configuration();
+const apiInstance = new ManagementApi(configuration);
+
+const { status, data } = await apiInstance.getManagementPluginStore();
+```
+
+### Parameters
+This endpoint does not have any parameters.
+
+
+### Return type
+
+**PluginStore**
+
+### Authorization
+
+[ManagementAuth](../README.md#ManagementAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json, application/problem+json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+|**401** | Missing or unknown API key (unauthorized). |  -  |
+|**404** | Model or task not found. |  -  |
+|**422** | Request validation failed or a task failed. |  -  |
+|**503** | No usable generation service is configured. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **getManagementStatus**
 > ManagementStatus getManagementStatus()
 
@@ -443,6 +557,67 @@ This endpoint does not have any parameters.
 |**401** | Missing or unknown API key (unauthorized). |  -  |
 |**404** | Model or task not found. |  -  |
 |**422** | Request validation failed or a task failed. |  -  |
+|**503** | No usable generation service is configured. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **installManagementGitHubPlugin**
+> PluginStore installManagementGitHubPlugin(gitHubPluginInstall)
+
+Fetch a public GitHub package, validate it, persist and atomically activate it.
+
+### Example
+
+```typescript
+import {
+    ManagementApi,
+    Configuration,
+    GitHubPluginInstall
+} from 'mm-gateway-ts';
+
+const configuration = new Configuration();
+const apiInstance = new ManagementApi(configuration);
+
+let gitHubPluginInstall: GitHubPluginInstall; //
+let ifMatch: string; //Current configuration revision (ETag). (optional) (default to undefined)
+
+const { status, data } = await apiInstance.installManagementGitHubPlugin(
+    gitHubPluginInstall,
+    ifMatch
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **gitHubPluginInstall** | **GitHubPluginInstall**|  | |
+| **ifMatch** | [**string**] | Current configuration revision (ETag). | (optional) defaults to undefined|
+
+
+### Return type
+
+**PluginStore**
+
+### Authorization
+
+[ManagementAuth](../README.md#ManagementAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json, application/problem+json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+|**401** | Missing or unknown API key (unauthorized). |  -  |
+|**404** | Model or task not found. |  -  |
+|**412** | Configuration changed; reload before saving. |  -  |
+|**422** | Validation Error |  -  |
+|**428** | A current If-Match revision is required. |  -  |
 |**503** | No usable generation service is configured. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -696,6 +871,70 @@ const { status, data } = await apiInstance.putManagementKey(
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **putManagementPlugin**
+> PluginStore putManagementPlugin(pluginOptions)
+
+Install a catalog plugin or change its enabled state, config, order or hook policy.
+
+### Example
+
+```typescript
+import {
+    ManagementApi,
+    Configuration,
+    PluginOptions
+} from 'mm-gateway-ts';
+
+const configuration = new Configuration();
+const apiInstance = new ManagementApi(configuration);
+
+let pluginId: string; // (default to undefined)
+let pluginOptions: PluginOptions; //
+let ifMatch: string; //Current configuration revision (ETag). (optional) (default to undefined)
+
+const { status, data } = await apiInstance.putManagementPlugin(
+    pluginId,
+    pluginOptions,
+    ifMatch
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **pluginOptions** | **PluginOptions**|  | |
+| **pluginId** | [**string**] |  | defaults to undefined|
+| **ifMatch** | [**string**] | Current configuration revision (ETag). | (optional) defaults to undefined|
+
+
+### Return type
+
+**PluginStore**
+
+### Authorization
+
+[ManagementAuth](../README.md#ManagementAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json, application/problem+json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+|**401** | Missing or unknown API key (unauthorized). |  -  |
+|**404** | Model or task not found. |  -  |
+|**412** | Configuration changed; reload before saving. |  -  |
+|**422** | Validation Error |  -  |
+|**428** | A current If-Match revision is required. |  -  |
+|**503** | No usable generation service is configured. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **putManagementProxy**
 > ManagementConfigResponse putManagementProxy(managedProxy)
 
@@ -759,6 +998,66 @@ const { status, data } = await apiInstance.putManagementProxy(
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **reloadManagementPlugin**
+> PluginStore reloadManagementPlugin()
+
+Reload from disk. A failed reload leaves the last working generation active.
+
+### Example
+
+```typescript
+import {
+    ManagementApi,
+    Configuration
+} from 'mm-gateway-ts';
+
+const configuration = new Configuration();
+const apiInstance = new ManagementApi(configuration);
+
+let pluginId: string; // (default to undefined)
+let ifMatch: string; //Current configuration revision (ETag). (optional) (default to undefined)
+
+const { status, data } = await apiInstance.reloadManagementPlugin(
+    pluginId,
+    ifMatch
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **pluginId** | [**string**] |  | defaults to undefined|
+| **ifMatch** | [**string**] | Current configuration revision (ETag). | (optional) defaults to undefined|
+
+
+### Return type
+
+**PluginStore**
+
+### Authorization
+
+[ManagementAuth](../README.md#ManagementAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json, application/problem+json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+|**401** | Missing or unknown API key (unauthorized). |  -  |
+|**404** | Model or task not found. |  -  |
+|**412** | Configuration changed; reload before saving. |  -  |
+|**422** | Validation Error |  -  |
+|**428** | A current If-Match revision is required. |  -  |
+|**503** | No usable generation service is configured. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **replaceManagementConfig**
 > ManagementConfigResponse replaceManagementConfig(managementConfig)
 
@@ -803,6 +1102,66 @@ const { status, data } = await apiInstance.replaceManagementConfig(
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json, application/problem+json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+|**401** | Missing or unknown API key (unauthorized). |  -  |
+|**404** | Model or task not found. |  -  |
+|**412** | Configuration changed; reload before saving. |  -  |
+|**422** | Validation Error |  -  |
+|**428** | A current If-Match revision is required. |  -  |
+|**503** | No usable generation service is configured. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **updateManagementGitHubPlugin**
+> PluginStore updateManagementGitHubPlugin()
+
+Re-fetch the installed GitHub ref and activate it only after validation.
+
+### Example
+
+```typescript
+import {
+    ManagementApi,
+    Configuration
+} from 'mm-gateway-ts';
+
+const configuration = new Configuration();
+const apiInstance = new ManagementApi(configuration);
+
+let pluginId: string; // (default to undefined)
+let ifMatch: string; //Current configuration revision (ETag). (optional) (default to undefined)
+
+const { status, data } = await apiInstance.updateManagementGitHubPlugin(
+    pluginId,
+    ifMatch
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **pluginId** | [**string**] |  | defaults to undefined|
+| **ifMatch** | [**string**] | Current configuration revision (ETag). | (optional) defaults to undefined|
+
+
+### Return type
+
+**PluginStore**
+
+### Authorization
+
+[ManagementAuth](../README.md#ManagementAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json, application/problem+json
 
 

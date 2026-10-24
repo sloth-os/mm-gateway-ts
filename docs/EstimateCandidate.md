@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **estimated_cost** | **number** |  | [optional] [default to undefined]
 **lifecycle** | **string** |  | [optional] [default to LifecycleEnum_Active]
 **model** | **string** |  | [default to undefined]
-**reason** | **string** | Why the candidate is not admissible: limits, retired, max_cost, unpriced or budget. | [optional] [default to undefined]
+**reason** | **string** | Why the candidate is not admissible: limits, retired, max_cost, unpriced, budget or plugin_policy. | [optional] [default to undefined]
 
 ## Example
 

@@ -22,6 +22,7 @@ docs/Dimensions.md
 docs/DiscoveredModel.md
 docs/EstimateCandidate.md
 docs/EstimateResponse.md
+docs/GitHubPluginInstall.md
 docs/HealthResponse.md
 docs/HistogramSample.md
 docs/ImageInput.md
@@ -61,6 +62,12 @@ docs/MusicOutput.md
 docs/MusicParameters.md
 docs/MusicRequest.md
 docs/MusicTaskResponse.md
+docs/PluginDiscoveryError.md
+docs/PluginEntry.md
+docs/PluginManifest.md
+docs/PluginOptions.md
+docs/PluginSource.md
+docs/PluginStore.md
 docs/ProblemDetail.md
 docs/ProxyAccount.md
 docs/ProxyApi.md

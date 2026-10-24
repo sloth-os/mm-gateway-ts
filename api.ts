@@ -195,7 +195,7 @@ export interface EstimateCandidate {
     'lifecycle'?: EstimateCandidateLifecycleEnum;
     'model': string;
     /**
-     * Why the candidate is not admissible: limits, retired, max_cost, unpriced or budget.
+     * Why the candidate is not admissible: limits, retired, max_cost, unpriced, budget or plugin_policy.
      */
     'reason'?: string | null;
 }
@@ -242,6 +242,18 @@ export const EstimateResponseObjectEnum = {
 
 export type EstimateResponseObjectEnum = typeof EstimateResponseObjectEnum[keyof typeof EstimateResponseObjectEnum];
 
+export interface GitHubPluginInstall {
+    'options'?: PluginOptions;
+    /**
+     * Branch, tag or commit to fetch.
+     */
+    'ref'?: string;
+    /**
+     * HTTPS GitHub repository URL.
+     */
+    'repository': string;
+    'subdirectory'?: string;
+}
 export interface HealthResponse {
     [key: string]: any;
 
@@ -438,6 +450,10 @@ export interface ManagedKey {
 }
 export interface ManagedProxy {
     'accounts'?: Array<ProxyAccount>;
+    /**
+     * Plugin providing on_backend_request for HTTP proxy authentication.
+     */
+    'auth_plugin'?: string | null;
     'base_url': string;
     'domain'?: string | null;
     'enabled'?: boolean;
@@ -803,6 +819,108 @@ export const MusicTaskResponseStatusEnum = {
 
 export type MusicTaskResponseStatusEnum = typeof MusicTaskResponseStatusEnum[keyof typeof MusicTaskResponseStatusEnum];
 
+export interface PluginDiscoveryError {
+    'error': string;
+    'path': string;
+}
+export interface PluginEntry {
+    'active'?: boolean;
+    'calls'?: number;
+    'error'?: string | null;
+    'failures'?: number;
+    'generation'?: string | null;
+    'id': string;
+    'installed'?: boolean;
+    'loaded_at'?: number | null;
+    'manifest'?: PluginManifest | null;
+    'options'?: PluginOptions | null;
+    'source': PluginSource;
+}
+export interface PluginManifest {
+    'api_version'?: PluginManifestApiVersionEnum;
+    'author'?: string;
+    /**
+     * Backend types for automatic authentication hooks; * matches all.
+     */
+    'backend_types'?: Array<string>;
+    'default_config'?: { [key: string]: any; };
+    'description'?: string;
+    'homepage'?: string | null;
+    'hooks'?: Array<PluginManifestHooksEnum>;
+    'id': string;
+    'methods'?: Array<string>;
+    'name': string;
+    'paths'?: Array<string>;
+    /**
+     * New provider types exported by this plugin.
+     */
+    'providers'?: Array<string>;
+    'response_body'?: PluginManifestResponseBodyEnum;
+    'version': string;
+}
+
+export const PluginManifestApiVersionEnum = {
+    _1: '1',
+} as const;
+
+export type PluginManifestApiVersionEnum = typeof PluginManifestApiVersionEnum[keyof typeof PluginManifestApiVersionEnum];
+export const PluginManifestHooksEnum = {
+    OnRequest: 'on_request',
+    OnResponse: 'on_response',
+    OnResponseChunk: 'on_response_chunk',
+    PrepareBackend: 'prepare_backend',
+    OnBackendRequest: 'on_backend_request',
+    Route: 'route',
+} as const;
+
+export type PluginManifestHooksEnum = typeof PluginManifestHooksEnum[keyof typeof PluginManifestHooksEnum];
+export const PluginManifestResponseBodyEnum = {
+    None: 'none',
+    Json: 'json',
+} as const;
+
+export type PluginManifestResponseBodyEnum = typeof PluginManifestResponseBodyEnum[keyof typeof PluginManifestResponseBodyEnum];
+
+export interface PluginOptions {
+    'config'?: { [key: string]: any; };
+    'enabled'?: boolean;
+    'failure_mode'?: PluginOptionsFailureModeEnum;
+    'order'?: number;
+    'timeout_ms'?: number;
+}
+
+export const PluginOptionsFailureModeEnum = {
+    Closed: 'closed',
+    Open: 'open',
+} as const;
+
+export type PluginOptionsFailureModeEnum = typeof PluginOptionsFailureModeEnum[keyof typeof PluginOptionsFailureModeEnum];
+
+export interface PluginSource {
+    'commit'?: string | null;
+    'kind': PluginSourceKindEnum;
+    'path'?: string;
+    'ref'?: string | null;
+    'repository'?: string | null;
+    'subdirectory'?: string;
+}
+
+export const PluginSourceKindEnum = {
+    Builtin: 'builtin',
+    Local: 'local',
+    Github: 'github',
+} as const;
+
+export type PluginSourceKindEnum = typeof PluginSourceKindEnum[keyof typeof PluginSourceKindEnum];
+
+export interface PluginStore {
+    'data': Array<PluginEntry>;
+    'directory': string;
+    'errors': Array<PluginDiscoveryError>;
+    'persistent': boolean;
+    'revision': string;
+    'watching': boolean;
+}
 /**
  * RFC 9457 problem details with stable gateway extensions.
  */
@@ -2188,6 +2306,48 @@ export const ManagementApiAxiosParamCreator = function (configuration?: Configur
             };
         },
         /**
+         * Uninstall, releasing old generations after their in-flight requests complete.
+         * @summary Delete Plugin
+         * @param {string} pluginId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteManagementPlugin: async (pluginId: string, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pluginId' is not null or undefined
+            assertParamExists('deleteManagementPlugin', 'pluginId', pluginId)
+            const localVarPath = `/v1/management/plugins/{plugin_id}`
+                .replace('{plugin_id}', encodeURIComponent(String(pluginId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 
          * @summary Delete Proxy
          * @param {string} domain 
@@ -2375,6 +2535,40 @@ export const ManagementApiAxiosParamCreator = function (configuration?: Configur
             };
         },
         /**
+         * Discover bundled, local and installed GitHub plugins without executing them.
+         * @summary Get Store
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getManagementPluginStore: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/management/plugins`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 
          * @summary Get Status
          * @param {*} [options] Override http request option.
@@ -2402,6 +2596,49 @@ export const ManagementApiAxiosParamCreator = function (configuration?: Configur
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Fetch a public GitHub package, validate it, persist and atomically activate it.
+         * @summary Install Github
+         * @param {GitHubPluginInstall} gitHubPluginInstall 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        installManagementGitHubPlugin: async (gitHubPluginInstall: GitHubPluginInstall, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'gitHubPluginInstall' is not null or undefined
+            assertParamExists('installManagementGitHubPlugin', 'gitHubPluginInstall', gitHubPluginInstall)
+            const localVarPath = `/v1/management/plugins/install`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(gitHubPluginInstall, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2606,6 +2843,53 @@ export const ManagementApiAxiosParamCreator = function (configuration?: Configur
             };
         },
         /**
+         * Install a catalog plugin or change its enabled state, config, order or hook policy.
+         * @summary Put Plugin
+         * @param {string} pluginId 
+         * @param {PluginOptions} pluginOptions 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putManagementPlugin: async (pluginId: string, pluginOptions: PluginOptions, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pluginId' is not null or undefined
+            assertParamExists('putManagementPlugin', 'pluginId', pluginId)
+            // verify required parameter 'pluginOptions' is not null or undefined
+            assertParamExists('putManagementPlugin', 'pluginOptions', pluginOptions)
+            const localVarPath = `/v1/management/plugins/{plugin_id}`
+                .replace('{plugin_id}', encodeURIComponent(String(pluginId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(pluginOptions, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 
          * @summary Put Proxy
          * @param {string} domain 
@@ -2646,6 +2930,48 @@ export const ManagementApiAxiosParamCreator = function (configuration?: Configur
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(managedProxy, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Reload from disk. A failed reload leaves the last working generation active.
+         * @summary Reload Plugin
+         * @param {string} pluginId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        reloadManagementPlugin: async (pluginId: string, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pluginId' is not null or undefined
+            assertParamExists('reloadManagementPlugin', 'pluginId', pluginId)
+            const localVarPath = `/v1/management/plugins/{plugin_id}/reload`
+                .replace('{plugin_id}', encodeURIComponent(String(pluginId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2695,6 +3021,48 @@ export const ManagementApiAxiosParamCreator = function (configuration?: Configur
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Re-fetch the installed GitHub ref and activate it only after validation.
+         * @summary Update Plugin
+         * @param {string} pluginId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateManagementGitHubPlugin: async (pluginId: string, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pluginId' is not null or undefined
+            assertParamExists('updateManagementGitHubPlugin', 'pluginId', pluginId)
+            const localVarPath = `/v1/management/plugins/{plugin_id}/update`
+                .replace('{plugin_id}', encodeURIComponent(String(pluginId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            if (ifMatch != null) {
+                localVarHeaderParameter['If-Match'] = String(ifMatch);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -2730,6 +3098,20 @@ export const ManagementApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteManagementKey(keyId, ifMatch, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ManagementApi.deleteManagementKey']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Uninstall, releasing old generations after their in-flight requests complete.
+         * @summary Delete Plugin
+         * @param {string} pluginId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteManagementPlugin(pluginId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PluginStore>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteManagementPlugin(pluginId, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.deleteManagementPlugin']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -2797,6 +3179,18 @@ export const ManagementApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Discover bundled, local and installed GitHub plugins without executing them.
+         * @summary Get Store
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getManagementPluginStore(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PluginStore>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getManagementPluginStore(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.getManagementPluginStore']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 
          * @summary Get Status
          * @param {*} [options] Override http request option.
@@ -2806,6 +3200,20 @@ export const ManagementApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getManagementStatus(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ManagementApi.getManagementStatus']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Fetch a public GitHub package, validate it, persist and atomically activate it.
+         * @summary Install Github
+         * @param {GitHubPluginInstall} gitHubPluginInstall 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async installManagementGitHubPlugin(gitHubPluginInstall: GitHubPluginInstall, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PluginStore>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.installManagementGitHubPlugin(gitHubPluginInstall, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.installManagementGitHubPlugin']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -2870,6 +3278,21 @@ export const ManagementApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Install a catalog plugin or change its enabled state, config, order or hook policy.
+         * @summary Put Plugin
+         * @param {string} pluginId 
+         * @param {PluginOptions} pluginOptions 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putManagementPlugin(pluginId: string, pluginOptions: PluginOptions, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PluginStore>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putManagementPlugin(pluginId, pluginOptions, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.putManagementPlugin']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 
          * @summary Put Proxy
          * @param {string} domain 
@@ -2885,6 +3308,20 @@ export const ManagementApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Reload from disk. A failed reload leaves the last working generation active.
+         * @summary Reload Plugin
+         * @param {string} pluginId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async reloadManagementPlugin(pluginId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PluginStore>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.reloadManagementPlugin(pluginId, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.reloadManagementPlugin']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 
          * @summary Replace Config
          * @param {ManagementConfig} managementConfig 
@@ -2896,6 +3333,20 @@ export const ManagementApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.replaceManagementConfig(managementConfig, ifMatch, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ManagementApi.replaceManagementConfig']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Re-fetch the installed GitHub ref and activate it only after validation.
+         * @summary Update Plugin
+         * @param {string} pluginId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateManagementGitHubPlugin(pluginId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PluginStore>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateManagementGitHubPlugin(pluginId, ifMatch, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.updateManagementGitHubPlugin']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -2928,6 +3379,17 @@ export const ManagementApiFactory = function (configuration?: Configuration, bas
          */
         deleteManagementKey(keyId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
             return localVarFp.deleteManagementKey(keyId, ifMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Uninstall, releasing old generations after their in-flight requests complete.
+         * @summary Delete Plugin
+         * @param {string} pluginId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteManagementPlugin(pluginId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<PluginStore> {
+            return localVarFp.deleteManagementPlugin(pluginId, ifMatch, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2979,6 +3441,15 @@ export const ManagementApiFactory = function (configuration?: Configuration, bas
             return localVarFp.getManagementMetrics(options).then((request) => request(axios, basePath));
         },
         /**
+         * Discover bundled, local and installed GitHub plugins without executing them.
+         * @summary Get Store
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getManagementPluginStore(options?: RawAxiosRequestConfig): AxiosPromise<PluginStore> {
+            return localVarFp.getManagementPluginStore(options).then((request) => request(axios, basePath));
+        },
+        /**
          * 
          * @summary Get Status
          * @param {*} [options] Override http request option.
@@ -2986,6 +3457,17 @@ export const ManagementApiFactory = function (configuration?: Configuration, bas
          */
         getManagementStatus(options?: RawAxiosRequestConfig): AxiosPromise<ManagementStatus> {
             return localVarFp.getManagementStatus(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Fetch a public GitHub package, validate it, persist and atomically activate it.
+         * @summary Install Github
+         * @param {GitHubPluginInstall} gitHubPluginInstall 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        installManagementGitHubPlugin(gitHubPluginInstall: GitHubPluginInstall, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<PluginStore> {
+            return localVarFp.installManagementGitHubPlugin(gitHubPluginInstall, ifMatch, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3037,6 +3519,18 @@ export const ManagementApiFactory = function (configuration?: Configuration, bas
             return localVarFp.putManagementKey(keyId, managedKey, ifMatch, options).then((request) => request(axios, basePath));
         },
         /**
+         * Install a catalog plugin or change its enabled state, config, order or hook policy.
+         * @summary Put Plugin
+         * @param {string} pluginId 
+         * @param {PluginOptions} pluginOptions 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putManagementPlugin(pluginId: string, pluginOptions: PluginOptions, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<PluginStore> {
+            return localVarFp.putManagementPlugin(pluginId, pluginOptions, ifMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
          * 
          * @summary Put Proxy
          * @param {string} domain 
@@ -3049,6 +3543,17 @@ export const ManagementApiFactory = function (configuration?: Configuration, bas
             return localVarFp.putManagementProxy(domain, managedProxy, ifMatch, options).then((request) => request(axios, basePath));
         },
         /**
+         * Reload from disk. A failed reload leaves the last working generation active.
+         * @summary Reload Plugin
+         * @param {string} pluginId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        reloadManagementPlugin(pluginId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<PluginStore> {
+            return localVarFp.reloadManagementPlugin(pluginId, ifMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
          * 
          * @summary Replace Config
          * @param {ManagementConfig} managementConfig 
@@ -3058,6 +3563,17 @@ export const ManagementApiFactory = function (configuration?: Configuration, bas
          */
         replaceManagementConfig(managementConfig: ManagementConfig, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
             return localVarFp.replaceManagementConfig(managementConfig, ifMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Re-fetch the installed GitHub ref and activate it only after validation.
+         * @summary Update Plugin
+         * @param {string} pluginId 
+         * @param {string | null} [ifMatch] Current configuration revision (ETag).
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateManagementGitHubPlugin(pluginId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<PluginStore> {
+            return localVarFp.updateManagementGitHubPlugin(pluginId, ifMatch, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -3088,6 +3604,18 @@ export class ManagementApi extends BaseAPI {
      */
     public deleteManagementKey(keyId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
         return ManagementApiFp(this.configuration).deleteManagementKey(keyId, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Uninstall, releasing old generations after their in-flight requests complete.
+     * @summary Delete Plugin
+     * @param {string} pluginId 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public deleteManagementPlugin(pluginId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).deleteManagementPlugin(pluginId, ifMatch, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3145,6 +3673,16 @@ export class ManagementApi extends BaseAPI {
     }
 
     /**
+     * Discover bundled, local and installed GitHub plugins without executing them.
+     * @summary Get Store
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getManagementPluginStore(options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).getManagementPluginStore(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * 
      * @summary Get Status
      * @param {*} [options] Override http request option.
@@ -3152,6 +3690,18 @@ export class ManagementApi extends BaseAPI {
      */
     public getManagementStatus(options?: RawAxiosRequestConfig) {
         return ManagementApiFp(this.configuration).getManagementStatus(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Fetch a public GitHub package, validate it, persist and atomically activate it.
+     * @summary Install Github
+     * @param {GitHubPluginInstall} gitHubPluginInstall 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public installManagementGitHubPlugin(gitHubPluginInstall: GitHubPluginInstall, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).installManagementGitHubPlugin(gitHubPluginInstall, ifMatch, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3208,6 +3758,19 @@ export class ManagementApi extends BaseAPI {
     }
 
     /**
+     * Install a catalog plugin or change its enabled state, config, order or hook policy.
+     * @summary Put Plugin
+     * @param {string} pluginId 
+     * @param {PluginOptions} pluginOptions 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public putManagementPlugin(pluginId: string, pluginOptions: PluginOptions, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).putManagementPlugin(pluginId, pluginOptions, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * 
      * @summary Put Proxy
      * @param {string} domain 
@@ -3221,6 +3784,18 @@ export class ManagementApi extends BaseAPI {
     }
 
     /**
+     * Reload from disk. A failed reload leaves the last working generation active.
+     * @summary Reload Plugin
+     * @param {string} pluginId 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public reloadManagementPlugin(pluginId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).reloadManagementPlugin(pluginId, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * 
      * @summary Replace Config
      * @param {ManagementConfig} managementConfig 
@@ -3230,6 +3805,18 @@ export class ManagementApi extends BaseAPI {
      */
     public replaceManagementConfig(managementConfig: ManagementConfig, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
         return ManagementApiFp(this.configuration).replaceManagementConfig(managementConfig, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Re-fetch the installed GitHub ref and activate it only after validation.
+     * @summary Update Plugin
+     * @param {string} pluginId 
+     * @param {string | null} [ifMatch] Current configuration revision (ETag).
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public updateManagementGitHubPlugin(pluginId: string, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).updateManagementGitHubPlugin(pluginId, ifMatch, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

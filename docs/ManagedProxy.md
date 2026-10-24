@@ -6,6 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **accounts** | [**Array&lt;ProxyAccount&gt;**](ProxyAccount.md) |  | [optional] [default to undefined]
+**auth_plugin** | **string** | Plugin providing on_backend_request for HTTP proxy authentication. | [optional] [default to undefined]
 **base_url** | **string** |  | [default to undefined]
 **domain** | **string** |  | [optional] [default to undefined]
 **enabled** | **boolean** |  | [optional] [default to true]
@@ -21,6 +22,7 @@ import { ManagedProxy } from 'mm-gateway-ts';
 
 const instance: ManagedProxy = {
     accounts,
+    auth_plugin,
     base_url,
     domain,
     enabled,
