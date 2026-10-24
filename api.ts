@@ -119,6 +119,12 @@ export interface BackendCredential {
     'extra'?: { [key: string]: any; };
     'id': string;
 }
+export interface BackendModelCatalog {
+    'models': { [key: string]: Array<string>; };
+}
+export interface BackendModelDiscovery {
+    'data': Array<DiscoveredModel>;
+}
 export interface BackendRuntime {
     'accounts': Array<string>;
     'active': boolean;
@@ -167,6 +173,20 @@ export interface Dimensions {
     'height': number;
     'width': number;
 }
+export interface DiscoveredModel {
+    'id': string;
+    'modalities'?: Array<DiscoveredModelModalitiesEnum>;
+}
+
+export const DiscoveredModelModalitiesEnum = {
+    Image: 'image',
+    Video: 'video',
+    Music: 'music',
+    Audio: 'audio',
+} as const;
+
+export type DiscoveredModelModalitiesEnum = typeof DiscoveredModelModalitiesEnum[keyof typeof DiscoveredModelModalitiesEnum];
+
 export interface EstimateCandidate {
     [key: string]: any;
 
@@ -372,6 +392,14 @@ export interface ManagedBackend {
     'credentials'?: Array<BackendCredential>;
     'enabled'?: boolean;
     'extra'?: { [key: string]: any; };
+    /**
+     * Public alias to active upstream model id, scoped to this backend.
+     */
+    'model_aliases'?: object;
+    /**
+     * Active model allowlist by modality. Null uses provider defaults; {} disables all models.
+     */
+    'models'?: { [key: string]: Array<string>; } | null;
     'name': string;
     'tags'?: Array<string>;
     'type': string;
@@ -476,46 +504,27 @@ export interface ManagedUsage {
     'key_id': string;
     'usage': UsageResponse;
 }
-export interface ManagementConfigInput {
+export interface ManagementConfig {
     'backends'?: Array<ManagedBackend>;
     'budget_allow_unpriced'?: boolean;
     'catalog_models'?: { [key: string]: any; };
     'keys'?: Array<ManagedKey>;
     'outbound_proxy'?: string | null;
     'proxies'?: Array<ManagedProxy>;
-    'routing_default_optimize'?: ManagementConfigInputRoutingDefaultOptimizeEnum;
+    'routing_default_optimize'?: ManagementConfigRoutingDefaultOptimizeEnum;
     'routing_profiles'?: { [key: string]: ManagedRoutingProfile; };
 }
 
-export const ManagementConfigInputRoutingDefaultOptimizeEnum = {
+export const ManagementConfigRoutingDefaultOptimizeEnum = {
     Balanced: 'balanced',
     Cost: 'cost',
     Latency: 'latency',
 } as const;
 
-export type ManagementConfigInputRoutingDefaultOptimizeEnum = typeof ManagementConfigInputRoutingDefaultOptimizeEnum[keyof typeof ManagementConfigInputRoutingDefaultOptimizeEnum];
-
-export interface ManagementConfigOutput {
-    'backends'?: Array<ManagedBackend>;
-    'budget_allow_unpriced'?: boolean;
-    'catalog_models'?: { [key: string]: any; };
-    'keys'?: Array<ManagedKey>;
-    'outbound_proxy'?: string | null;
-    'proxies'?: Array<ManagedProxy>;
-    'routing_default_optimize'?: ManagementConfigOutputRoutingDefaultOptimizeEnum;
-    'routing_profiles'?: { [key: string]: ManagedRoutingProfile; };
-}
-
-export const ManagementConfigOutputRoutingDefaultOptimizeEnum = {
-    Balanced: 'balanced',
-    Cost: 'cost',
-    Latency: 'latency',
-} as const;
-
-export type ManagementConfigOutputRoutingDefaultOptimizeEnum = typeof ManagementConfigOutputRoutingDefaultOptimizeEnum[keyof typeof ManagementConfigOutputRoutingDefaultOptimizeEnum];
+export type ManagementConfigRoutingDefaultOptimizeEnum = typeof ManagementConfigRoutingDefaultOptimizeEnum[keyof typeof ManagementConfigRoutingDefaultOptimizeEnum];
 
 export interface ManagementConfigResponse {
-    'config': ManagementConfigOutput;
+    'config': ManagementConfig;
     'persistent': boolean;
     'revision': string;
 }
@@ -2221,6 +2230,83 @@ export const ManagementApiAxiosParamCreator = function (configuration?: Configur
             };
         },
         /**
+         * Read the draft backend\'s upstream models API without saving any configuration.
+         * @summary Discover Backend Models
+         * @param {ManagedBackend} managedBackend 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        discoverManagementBackendModels: async (managedBackend: ManagedBackend, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'managedBackend' is not null or undefined
+            assertParamExists('discoverManagementBackendModels', 'managedBackend', managedBackend)
+            const localVarPath = `/v1/management/backends/discover-models`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(managedBackend, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get Builtin Models
+         * @param {string} providerType 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getManagementBuiltinModels: async (providerType: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'providerType' is not null or undefined
+            assertParamExists('getManagementBuiltinModels', 'providerType', providerType)
+            const localVarPath = `/v1/management/backend-types/{provider_type}/models`
+                .replace('{provider_type}', encodeURIComponent(String(providerType)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication ManagementAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            localVarHeaderParameter['Accept'] = 'application/json,application/problem+json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 
          * @summary Get Config
          * @param {*} [options] Override http request option.
@@ -2569,14 +2655,14 @@ export const ManagementApiAxiosParamCreator = function (configuration?: Configur
         /**
          * 
          * @summary Replace Config
-         * @param {ManagementConfigInput} managementConfigInput 
+         * @param {ManagementConfig} managementConfig 
          * @param {string | null} [ifMatch] Current configuration revision (ETag).
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        replaceManagementConfig: async (managementConfigInput: ManagementConfigInput, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'managementConfigInput' is not null or undefined
-            assertParamExists('replaceManagementConfig', 'managementConfigInput', managementConfigInput)
+        replaceManagementConfig: async (managementConfig: ManagementConfig, ifMatch?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'managementConfig' is not null or undefined
+            assertParamExists('replaceManagementConfig', 'managementConfig', managementConfig)
             const localVarPath = `/v1/management/config`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2602,7 +2688,7 @@ export const ManagementApiAxiosParamCreator = function (configuration?: Configur
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(managementConfigInput, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(managementConfig, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2658,6 +2744,32 @@ export const ManagementApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteManagementProxy(domain, ifMatch, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ManagementApi.deleteManagementProxy']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Read the draft backend\'s upstream models API without saving any configuration.
+         * @summary Discover Backend Models
+         * @param {ManagedBackend} managedBackend 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async discoverManagementBackendModels(managedBackend: ManagedBackend, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BackendModelDiscovery>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.discoverManagementBackendModels(managedBackend, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.discoverManagementBackendModels']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get Builtin Models
+         * @param {string} providerType 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getManagementBuiltinModels(providerType: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BackendModelCatalog>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getManagementBuiltinModels(providerType, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ManagementApi.getManagementBuiltinModels']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -2775,13 +2887,13 @@ export const ManagementApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @summary Replace Config
-         * @param {ManagementConfigInput} managementConfigInput 
+         * @param {ManagementConfig} managementConfig 
          * @param {string | null} [ifMatch] Current configuration revision (ETag).
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async replaceManagementConfig(managementConfigInput: ManagementConfigInput, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementConfigResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.replaceManagementConfig(managementConfigInput, ifMatch, options);
+        async replaceManagementConfig(managementConfig: ManagementConfig, ifMatch?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ManagementConfigResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.replaceManagementConfig(managementConfig, ifMatch, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ManagementApi.replaceManagementConfig']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -2827,6 +2939,26 @@ export const ManagementApiFactory = function (configuration?: Configuration, bas
          */
         deleteManagementProxy(domain: string, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
             return localVarFp.deleteManagementProxy(domain, ifMatch, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Read the draft backend\'s upstream models API without saving any configuration.
+         * @summary Discover Backend Models
+         * @param {ManagedBackend} managedBackend 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        discoverManagementBackendModels(managedBackend: ManagedBackend, options?: RawAxiosRequestConfig): AxiosPromise<BackendModelDiscovery> {
+            return localVarFp.discoverManagementBackendModels(managedBackend, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get Builtin Models
+         * @param {string} providerType 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getManagementBuiltinModels(providerType: string, options?: RawAxiosRequestConfig): AxiosPromise<BackendModelCatalog> {
+            return localVarFp.getManagementBuiltinModels(providerType, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2919,13 +3051,13 @@ export const ManagementApiFactory = function (configuration?: Configuration, bas
         /**
          * 
          * @summary Replace Config
-         * @param {ManagementConfigInput} managementConfigInput 
+         * @param {ManagementConfig} managementConfig 
          * @param {string | null} [ifMatch] Current configuration revision (ETag).
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        replaceManagementConfig(managementConfigInput: ManagementConfigInput, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
-            return localVarFp.replaceManagementConfig(managementConfigInput, ifMatch, options).then((request) => request(axios, basePath));
+        replaceManagementConfig(managementConfig: ManagementConfig, ifMatch?: string | null, options?: RawAxiosRequestConfig): AxiosPromise<ManagementConfigResponse> {
+            return localVarFp.replaceManagementConfig(managementConfig, ifMatch, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2968,6 +3100,28 @@ export class ManagementApi extends BaseAPI {
      */
     public deleteManagementProxy(domain: string, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
         return ManagementApiFp(this.configuration).deleteManagementProxy(domain, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Read the draft backend\'s upstream models API without saving any configuration.
+     * @summary Discover Backend Models
+     * @param {ManagedBackend} managedBackend 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public discoverManagementBackendModels(managedBackend: ManagedBackend, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).discoverManagementBackendModels(managedBackend, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get Builtin Models
+     * @param {string} providerType 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public getManagementBuiltinModels(providerType: string, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).getManagementBuiltinModels(providerType, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3069,13 +3223,13 @@ export class ManagementApi extends BaseAPI {
     /**
      * 
      * @summary Replace Config
-     * @param {ManagementConfigInput} managementConfigInput 
+     * @param {ManagementConfig} managementConfig 
      * @param {string | null} [ifMatch] Current configuration revision (ETag).
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public replaceManagementConfig(managementConfigInput: ManagementConfigInput, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
-        return ManagementApiFp(this.configuration).replaceManagementConfig(managementConfigInput, ifMatch, options).then((request) => request(this.axios, this.basePath));
+    public replaceManagementConfig(managementConfig: ManagementConfig, ifMatch?: string | null, options?: RawAxiosRequestConfig) {
+        return ManagementApiFp(this.configuration).replaceManagementConfig(managementConfig, ifMatch, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

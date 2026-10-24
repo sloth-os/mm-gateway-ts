@@ -10,6 +10,8 @@ Name | Type | Description | Notes
 **credentials** | [**Array&lt;BackendCredential&gt;**](BackendCredential.md) |  | [optional] [default to undefined]
 **enabled** | **boolean** |  | [optional] [default to true]
 **extra** | **{ [key: string]: any; }** |  | [optional] [default to undefined]
+**model_aliases** | **object** | Public alias to active upstream model id, scoped to this backend. | [optional] [default to undefined]
+**models** | **{ [key: string]: Array&lt;string&gt;; }** | Active model allowlist by modality. Null uses provider defaults; {} disables all models. | [optional] [default to undefined]
 **name** | **string** |  | [default to undefined]
 **tags** | **Array&lt;string&gt;** |  | [optional] [default to undefined]
 **type** | **string** |  | [default to undefined]
@@ -25,6 +27,8 @@ const instance: ManagedBackend = {
     credentials,
     enabled,
     extra,
+    model_aliases,
+    models,
     name,
     tags,
     type,

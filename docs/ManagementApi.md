@@ -7,6 +7,8 @@ All URIs are relative to *http://localhost*
 |[**deleteManagementBackend**](#deletemanagementbackend) | **DELETE** /v1/management/backends/{name} | Delete Backend|
 |[**deleteManagementKey**](#deletemanagementkey) | **DELETE** /v1/management/keys/{key_id} | Delete Key|
 |[**deleteManagementProxy**](#deletemanagementproxy) | **DELETE** /v1/management/proxies/{domain} | Delete Proxy|
+|[**discoverManagementBackendModels**](#discovermanagementbackendmodels) | **POST** /v1/management/backends/discover-models | Discover Backend Models|
+|[**getManagementBuiltinModels**](#getmanagementbuiltinmodels) | **GET** /v1/management/backend-types/{provider_type}/models | Get Builtin Models|
 |[**getManagementConfig**](#getmanagementconfig) | **GET** /v1/management/config | Get Config|
 |[**getManagementMetrics**](#getmanagementmetrics) | **GET** /v1/management/metrics | Get Metrics|
 |[**getManagementStatus**](#getmanagementstatus) | **GET** /v1/management/status | Get Status|
@@ -190,6 +192,116 @@ const { status, data } = await apiInstance.deleteManagementProxy(
 |**412** | Configuration changed; reload before saving. |  -  |
 |**422** | Validation Error |  -  |
 |**428** | A current If-Match revision is required. |  -  |
+|**503** | No usable generation service is configured. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **discoverManagementBackendModels**
+> BackendModelDiscovery discoverManagementBackendModels(managedBackend)
+
+Read the draft backend\'s upstream models API without saving any configuration.
+
+### Example
+
+```typescript
+import {
+    ManagementApi,
+    Configuration,
+    ManagedBackend
+} from 'mm-gateway-ts';
+
+const configuration = new Configuration();
+const apiInstance = new ManagementApi(configuration);
+
+let managedBackend: ManagedBackend; //
+
+const { status, data } = await apiInstance.discoverManagementBackendModels(
+    managedBackend
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **managedBackend** | **ManagedBackend**|  | |
+
+
+### Return type
+
+**BackendModelDiscovery**
+
+### Authorization
+
+[ManagementAuth](../README.md#ManagementAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json, application/problem+json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+|**401** | Missing or unknown API key (unauthorized). |  -  |
+|**404** | Model or task not found. |  -  |
+|**422** | Validation Error |  -  |
+|**503** | No usable generation service is configured. |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getManagementBuiltinModels**
+> BackendModelCatalog getManagementBuiltinModels()
+
+
+### Example
+
+```typescript
+import {
+    ManagementApi,
+    Configuration
+} from 'mm-gateway-ts';
+
+const configuration = new Configuration();
+const apiInstance = new ManagementApi(configuration);
+
+let providerType: string; // (default to undefined)
+
+const { status, data } = await apiInstance.getManagementBuiltinModels(
+    providerType
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **providerType** | [**string**] |  | defaults to undefined|
+
+
+### Return type
+
+**BackendModelCatalog**
+
+### Authorization
+
+[ManagementAuth](../README.md#ManagementAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json, application/problem+json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+|**401** | Missing or unknown API key (unauthorized). |  -  |
+|**404** | Model or task not found. |  -  |
+|**422** | Validation Error |  -  |
 |**503** | No usable generation service is configured. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -648,7 +760,7 @@ const { status, data } = await apiInstance.putManagementProxy(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **replaceManagementConfig**
-> ManagementConfigResponse replaceManagementConfig(managementConfigInput)
+> ManagementConfigResponse replaceManagementConfig(managementConfig)
 
 
 ### Example
@@ -657,17 +769,17 @@ const { status, data } = await apiInstance.putManagementProxy(
 import {
     ManagementApi,
     Configuration,
-    ManagementConfigInput
+    ManagementConfig
 } from 'mm-gateway-ts';
 
 const configuration = new Configuration();
 const apiInstance = new ManagementApi(configuration);
 
-let managementConfigInput: ManagementConfigInput; //
+let managementConfig: ManagementConfig; //
 let ifMatch: string; //Current configuration revision (ETag). (optional) (default to undefined)
 
 const { status, data } = await apiInstance.replaceManagementConfig(
-    managementConfigInput,
+    managementConfig,
     ifMatch
 );
 ```
@@ -676,7 +788,7 @@ const { status, data } = await apiInstance.replaceManagementConfig(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **managementConfigInput** | **ManagementConfigInput**|  | |
+| **managementConfig** | **ManagementConfig**|  | |
 | **ifMatch** | [**string**] | Current configuration revision (ETag). | (optional) defaults to undefined|
 
 

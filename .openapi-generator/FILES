@@ -12,11 +12,14 @@ docs/AudioParameters.md
 docs/AudioRequest.md
 docs/AudioTaskResponse.md
 docs/BackendCredential.md
+docs/BackendModelCatalog.md
+docs/BackendModelDiscovery.md
 docs/BackendRuntime.md
 docs/BudgetDirective.md
 docs/BudgetState.md
 docs/CounterSample.md
 docs/Dimensions.md
+docs/DiscoveredModel.md
 docs/EstimateCandidate.md
 docs/EstimateResponse.md
 docs/HealthResponse.md
@@ -39,8 +42,7 @@ docs/ManagedRoutingProfile.md
 docs/ManagedTask.md
 docs/ManagedUsage.md
 docs/ManagementApi.md
-docs/ManagementConfigInput.md
-docs/ManagementConfigOutput.md
+docs/ManagementConfig.md
 docs/ManagementConfigResponse.md
 docs/ManagementMetrics.md
 docs/ManagementStatus.md

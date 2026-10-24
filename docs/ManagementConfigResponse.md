@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**config** | [**ManagementConfigOutput**](ManagementConfigOutput.md) |  | [default to undefined]
+**config** | [**ManagementConfig**](ManagementConfig.md) |  | [default to undefined]
 **persistent** | **boolean** |  | [default to undefined]
 **revision** | **string** |  | [default to undefined]
 

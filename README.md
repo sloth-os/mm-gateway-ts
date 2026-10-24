@@ -64,6 +64,8 @@ Class | Method | HTTP request | Description
 *ManagementApi* | [**deleteManagementBackend**](docs/ManagementApi.md#deletemanagementbackend) | **DELETE** /v1/management/backends/{name} | Delete Backend
 *ManagementApi* | [**deleteManagementKey**](docs/ManagementApi.md#deletemanagementkey) | **DELETE** /v1/management/keys/{key_id} | Delete Key
 *ManagementApi* | [**deleteManagementProxy**](docs/ManagementApi.md#deletemanagementproxy) | **DELETE** /v1/management/proxies/{domain} | Delete Proxy
+*ManagementApi* | [**discoverManagementBackendModels**](docs/ManagementApi.md#discovermanagementbackendmodels) | **POST** /v1/management/backends/discover-models | Discover Backend Models
+*ManagementApi* | [**getManagementBuiltinModels**](docs/ManagementApi.md#getmanagementbuiltinmodels) | **GET** /v1/management/backend-types/{provider_type}/models | Get Builtin Models
 *ManagementApi* | [**getManagementConfig**](docs/ManagementApi.md#getmanagementconfig) | **GET** /v1/management/config | Get Config
 *ManagementApi* | [**getManagementMetrics**](docs/ManagementApi.md#getmanagementmetrics) | **GET** /v1/management/metrics | Get Metrics
 *ManagementApi* | [**getManagementStatus**](docs/ManagementApi.md#getmanagementstatus) | **GET** /v1/management/status | Get Status
@@ -100,11 +102,14 @@ Class | Method | HTTP request | Description
  - [AudioRequest](docs/AudioRequest.md)
  - [AudioTaskResponse](docs/AudioTaskResponse.md)
  - [BackendCredential](docs/BackendCredential.md)
+ - [BackendModelCatalog](docs/BackendModelCatalog.md)
+ - [BackendModelDiscovery](docs/BackendModelDiscovery.md)
  - [BackendRuntime](docs/BackendRuntime.md)
  - [BudgetDirective](docs/BudgetDirective.md)
  - [BudgetState](docs/BudgetState.md)
  - [CounterSample](docs/CounterSample.md)
  - [Dimensions](docs/Dimensions.md)
+ - [DiscoveredModel](docs/DiscoveredModel.md)
  - [EstimateCandidate](docs/EstimateCandidate.md)
  - [EstimateResponse](docs/EstimateResponse.md)
  - [HealthResponse](docs/HealthResponse.md)
@@ -125,8 +130,7 @@ Class | Method | HTTP request | Description
  - [ManagedRoutingProfile](docs/ManagedRoutingProfile.md)
  - [ManagedTask](docs/ManagedTask.md)
  - [ManagedUsage](docs/ManagedUsage.md)
- - [ManagementConfigInput](docs/ManagementConfigInput.md)
- - [ManagementConfigOutput](docs/ManagementConfigOutput.md)
+ - [ManagementConfig](docs/ManagementConfig.md)
  - [ManagementConfigResponse](docs/ManagementConfigResponse.md)
  - [ManagementMetrics](docs/ManagementMetrics.md)
  - [ManagementStatus](docs/ManagementStatus.md)

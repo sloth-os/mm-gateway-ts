@@ -1,4 +1,4 @@
-# ManagementConfigOutput
+# ManagementConfig
 
 
 ## Properties
@@ -17,9 +17,9 @@ Name | Type | Description | Notes
 ## Example
 
 ```typescript
-import { ManagementConfigOutput } from 'mm-gateway-ts';
+import { ManagementConfig } from 'mm-gateway-ts';
 
-const instance: ManagementConfigOutput = {
+const instance: ManagementConfig = {
     backends,
     budget_allow_unpriced,
     catalog_models,
