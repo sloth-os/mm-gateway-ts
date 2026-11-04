@@ -979,6 +979,25 @@ export interface ResourceLinks {
     'self': string;
 }
 /**
+ * What the backend that served a task could not carry as asked (docs/design/unification.md#best-effort).
+ */
+export interface RoutingAdjustment {
+    [key: string]: any;
+
+    'action': RoutingAdjustmentActionEnum;
+    'detail'?: string | null;
+    'parameter': string;
+}
+
+export const RoutingAdjustmentActionEnum = {
+    Merged: 'merged',
+    Translated: 'translated',
+    Dropped: 'dropped',
+} as const;
+
+export type RoutingAdjustmentActionEnum = typeof RoutingAdjustmentActionEnum[keyof typeof RoutingAdjustmentActionEnum];
+
+/**
  * Steer auto mode: policy, ordering, cost ceiling, fallbacks and budget scope.  See docs/design/auto-mode.md. Every member is optional.
  */
 export interface RoutingDirective {
@@ -1022,6 +1041,7 @@ export type RoutingDirectiveOptimizeEnum = typeof RoutingDirectiveOptimizeEnum[k
 export interface RoutingInfo {
     [key: string]: any;
 
+    'adjustments'?: Array<RoutingAdjustment>;
     'attempts'?: number;
     'budget'?: BudgetState | null;
     'estimated_cost'?: number | null;

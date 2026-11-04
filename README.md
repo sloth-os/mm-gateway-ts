@@ -164,6 +164,7 @@ Class | Method | HTTP request | Description
  - [ProxyAccount](docs/ProxyAccount.md)
  - [ProxyRuntime](docs/ProxyRuntime.md)
  - [ResourceLinks](docs/ResourceLinks.md)
+ - [RoutingAdjustment](docs/RoutingAdjustment.md)
  - [RoutingDirective](docs/RoutingDirective.md)
  - [RoutingInfo](docs/RoutingInfo.md)
  - [SelectionHealth](docs/SelectionHealth.md)

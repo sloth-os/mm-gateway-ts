@@ -6,6 +6,7 @@ How auto mode served a task (docs/design/auto-mode.md#fallbacks).
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**adjustments** | [**Array&lt;RoutingAdjustment&gt;**](RoutingAdjustment.md) |  | [optional] [default to undefined]
 **attempts** | **number** |  | [optional] [default to 1]
 **budget** | [**BudgetState**](BudgetState.md) |  | [optional] [default to undefined]
 **estimated_cost** | **number** |  | [optional] [default to undefined]
@@ -20,6 +21,7 @@ Name | Type | Description | Notes
 import { RoutingInfo } from 'mm-gateway-ts';
 
 const instance: RoutingInfo = {
+    adjustments,
     attempts,
     budget,
     estimated_cost,
